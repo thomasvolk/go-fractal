@@ -4,9 +4,9 @@ Mandelbrot generator library for go lang.
 
 ## Examples
 
-build app:
+build example app:
 
-    cd examples
+    cd example
     make
 
 generate png:
