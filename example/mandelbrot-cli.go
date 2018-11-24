@@ -33,13 +33,22 @@ func forQueryParam(r *http.Request, param string, f func(value float64)) {
 
 func drawHandler(m mandelbrot.Mandelbrot) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		mc := mandelbrot.Mandelbrot{
+			Xstart:     m.Xstart,
+			Xend:       m.Xend,
+			Ystart:     m.Ystart,
+			Yend:       m.Yend,
+			Iterations: m.Iterations,
+			Width:      m.Width,
+			Height:     m.Height,
+		}
 		w.Header().Set("Content-Type", "image/png")
-		forQueryParam(r, "xstart", func(value float64) { m.Xstart = value })
-		forQueryParam(r, "xend", func(value float64) { m.Xend = value })
-		forQueryParam(r, "ystart", func(value float64) { m.Ystart = value })
-		forQueryParam(r, "yend", func(value float64) { m.Yend = value })
-		forQueryParam(r, "iterations", func(value float64) { m.Iterations = int(value) })
-		image := m.Draw()
+		forQueryParam(r, "xstart", func(value float64) { mc.Xstart = value })
+		forQueryParam(r, "xend", func(value float64) { mc.Xend = value })
+		forQueryParam(r, "ystart", func(value float64) { mc.Ystart = value })
+		forQueryParam(r, "yend", func(value float64) { mc.Yend = value })
+		forQueryParam(r, "iterations", func(value float64) { mc.Iterations = int(value) })
+		image := mc.Draw()
 		png.Encode(w, image)
 	}
 }
@@ -56,8 +65,8 @@ func main() {
 	var serve bool
 	var port int
 
-	flag.Float64Var(&xstart, "xstart", -1.6, "xstart")
-	flag.Float64Var(&xend, "xend", 0.2, "xend")
+	flag.Float64Var(&xstart, "xstart", -2.0, "xstart")
+	flag.Float64Var(&xend, "xend", 1.2, "xend")
 	flag.Float64Var(&ystart, "ystart", -1.2, "ystart")
 	flag.Float64Var(&yend, "yend", 1.2, "yend")
 	flag.IntVar(&iterations, "iterations", 100, "iterations")
@@ -71,7 +80,7 @@ func main() {
 
 	m := mandelbrot.Mandelbrot{
 		Xstart:     xstart,
-		Xend:       yend,
+		Xend:       xend,
 		Ystart:     ystart,
 		Yend:       yend,
 		Iterations: iterations,
