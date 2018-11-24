@@ -1,2 +1,3 @@
 # go-mandelbrot
-go mandelbrot generator library
+
+Mandelbrot generator library for go lang.
