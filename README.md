@@ -1,6 +1,6 @@
-# go-mandelbrot
+# go-fractal
 
-Mandelbrot generator library for go lang.
+Fractal library for go lang.
 
 ## Examples
 
