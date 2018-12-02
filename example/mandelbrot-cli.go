@@ -48,7 +48,7 @@ func drawHandler(m mandelbrot.Mandelbrot) func(w http.ResponseWriter, r *http.Re
 		forQueryParam(r, "ystart", func(value float64) { mc.Ystart = value })
 		forQueryParam(r, "yend", func(value float64) { mc.Yend = value })
 		forQueryParam(r, "iterations", func(value float64) { mc.Iterations = int(value) })
-		image := mc.Draw()
+		image := mc.Set().Image()
 		png.Encode(w, image)
 	}
 }
@@ -94,7 +94,7 @@ func main() {
 			panic(err)
 		}
 	} else {
-		image := m.Draw()
+		image := m.Set().Image()
 		writeFile(outputfile, image)
 	}
 }
