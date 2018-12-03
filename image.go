@@ -6,11 +6,11 @@ import (
 )
 
 func (ms MandelbrotSet) Image() *image.RGBA {
-	img := image.NewRGBA(image.Rect(0, 0, ms.Width, ms.Height))
+	img := image.NewRGBA(image.Rect(0, 0, ms.Width(), ms.Height()))
 	colorCalculator := ms.colorCalculator()
-	for y := range ms.Set {
-		for x := range ms.Set[y] {
-			color := colorCalculator(float64(ms.Set[y][x]))
+	for y := 0; y < ms.Height(); y++ {
+		for x := 0; x < ms.Width(); x++ {
+			color := colorCalculator(float64(ms.Get(x, y)))
 			img.Set(x, y, color)
 		}
 	}
@@ -18,7 +18,7 @@ func (ms MandelbrotSet) Image() *image.RGBA {
 }
 
 func (ms MandelbrotSet) colorCalculator() func(i float64) color.RGBA {
-	iterations := float64(ms.Iterations)
+	iterations := float64(ms.Iterations())
 	colorStep := 255.0 / iterations
 	iterationsHalf := iterations / 2.0
 	return func(i float64) color.RGBA {

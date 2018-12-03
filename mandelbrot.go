@@ -16,11 +16,19 @@ type Mandelbrot struct {
 }
 
 type MandelbrotSet struct {
-	Set        [][]int
-	Width      int
-	Height     int
-	Iterations int
+	set        [][]int
+	width      int
+	height     int
+	iterations int
 }
+
+func (ms MandelbrotSet) Get(x int, y int) int { return ms.set[y][x] }
+
+func (ms MandelbrotSet) Width() int { return ms.width }
+
+func (ms MandelbrotSet) Height() int { return ms.height }
+
+func (ms MandelbrotSet) Iterations() int { return ms.iterations }
 
 func (m *Mandelbrot) Set() MandelbrotSet {
 	resultSet := make([][]int, m.Height)
