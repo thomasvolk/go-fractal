@@ -31,21 +31,21 @@ func forQueryParam(r *http.Request, param string, f func(value float64)) {
 	}
 }
 
-func drawHandler(m fractal.ComplexSet) func(w http.ResponseWriter, r *http.Request) {
+func drawHandler(conf fractal.Config) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		mc := fractal.ComplexSet{
-			XRange:     fractal.Range{Start: m.XRange.Start, End: m.XRange.End},
-			YRange:     fractal.Range{Start: m.YRange.Start, End: m.YRange.End},
-			Iterations: m.Iterations,
-			Resolution: fractal.Resolution{Width: m.Resolution.Width, Height: m.Resolution.Height},
+		copyConf := fractal.Config{
+			Real:       fractal.Range{Start: conf.Real.Start, End: conf.Real.End},
+			Imaginary:  fractal.Range{Start: conf.Imaginary.Start, End: conf.Imaginary.End},
+			Iterations: conf.Iterations,
+			Resolution: fractal.Resolution{Width: conf.Resolution.Width, Height: conf.Resolution.Height},
 		}
 		w.Header().Set("Content-Type", "image/png")
-		forQueryParam(r, "xstart", func(value float64) { mc.XRange.Start = value })
-		forQueryParam(r, "xend", func(value float64) { mc.XRange.End = value })
-		forQueryParam(r, "ystart", func(value float64) { mc.YRange.Start = value })
-		forQueryParam(r, "yend", func(value float64) { mc.YRange.End = value })
-		forQueryParam(r, "iterations", func(value float64) { mc.Iterations = int(value) })
-		image := fractal.Image(mc, fractal.Mandelbrot(mc))
+		forQueryParam(r, "xstart", func(value float64) { copyConf.Real.Start = value })
+		forQueryParam(r, "xend", func(value float64) { copyConf.Real.End = value })
+		forQueryParam(r, "ystart", func(value float64) { copyConf.Imaginary.Start = value })
+		forQueryParam(r, "yend", func(value float64) { copyConf.Imaginary.End = value })
+		forQueryParam(r, "iterations", func(value float64) { copyConf.Iterations = int(value) })
+		image := fractal.Image(copyConf, fractal.Mandelbrot(copyConf))
 		png.Encode(w, image)
 	}
 }
@@ -75,20 +75,20 @@ func main() {
 
 	flag.Parse()
 
-	m := fractal.ComplexSet{
-		XRange:     fractal.Range{Start: xstart, End: xend},
-		YRange:     fractal.Range{Start: ystart, End: yend},
+	conf := fractal.Config{
+		Real:       fractal.Range{Start: xstart, End: xend},
+		Imaginary:  fractal.Range{Start: ystart, End: yend},
 		Iterations: iterations,
 		Resolution: fractal.Resolution{Width: width, Height: height},
 	}
 
 	if serve {
-		http.HandleFunc("/", drawHandler(m))
+		http.HandleFunc("/", drawHandler(conf))
 		if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
 			panic(err)
 		}
 	} else {
-		image := fractal.Image(m, fractal.Mandelbrot(m))
+		image := fractal.Image(conf, fractal.Mandelbrot(conf))
 		writeFile(outputfile, image)
 	}
 }

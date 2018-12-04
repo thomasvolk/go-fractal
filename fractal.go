@@ -10,10 +10,10 @@ type Resolution struct {
 	Height int
 }
 
-type ComplexSet struct {
+type Config struct {
 	Resolution Resolution
-	XRange     Range
-	YRange     Range
+	Real       Range
+	Imaginary  Range
 	Iterations int
 }
 

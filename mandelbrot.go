@@ -5,10 +5,10 @@ import (
 	"sync"
 )
 
-func Mandelbrot(cs ComplexSet) IterationMapping {
-	r := cs.Resolution
-	xrange := cs.XRange
-	yrange := cs.YRange
+func Mandelbrot(conf Config) IterationMapping {
+	r := conf.Resolution
+	xrange := conf.Real
+	yrange := conf.Imaginary
 	resultSet := make([][]int, r.Height)
 	xStep := (xrange.End - xrange.Start) / float64(r.Width)
 	yStep := (yrange.End - yrange.Start) / float64(r.Height)
@@ -19,11 +19,11 @@ func Mandelbrot(cs ComplexSet) IterationMapping {
 	for y := 0; y < r.Height; y++ {
 		resultSetRow := make([]int, r.Width)
 		for x := 0; x < r.Width; x++ {
-			go func(fcs ComplexSet, row []int, px int, py int) {
+			go func(fcs Config, row []int, px int, py int) {
 				defer wg.Done()
 				i := calculateIterations(fcs, px, py, xStep, yStep)
 				row[px] = i
-			}(cs, resultSetRow, x, y)
+			}(conf, resultSetRow, x, y)
 		}
 		resultSet[y] = resultSetRow
 	}
@@ -32,12 +32,12 @@ func Mandelbrot(cs ComplexSet) IterationMapping {
 	return NewIterationMapping(resultSet)
 }
 
-func calculateIterations(cs ComplexSet, x int, y int, xStep float64, yStep float64) int {
-	c := complex((float64(x)*xStep)+cs.XRange.Start,
-		(float64(y)*yStep)+cs.YRange.Start)
+func calculateIterations(conf Config, x int, y int, xStep float64, yStep float64) int {
+	c := complex((float64(x)*xStep)+conf.Real.Start,
+		(float64(y)*yStep)+conf.Imaginary.Start)
 	z := 0 + 0i
 	i := 0
-	for ; i < cs.Iterations; i++ {
+	for ; i < conf.Iterations; i++ {
 		z = z*z + c
 		if cmplx.Abs(z) >= 2 {
 			break
