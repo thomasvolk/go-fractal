@@ -5,21 +5,20 @@ import (
 	"image/color"
 )
 
-func Image(conf Config, s IterationMapping) *image.RGBA {
+func Image(conf Config, valueMap [][]int) *image.RGBA {
 	r := conf.Resolution
 	img := image.NewRGBA(image.Rect(0, 0, r.Width, r.Height))
-	colorCalculator := colorCalculator(conf)
-	for y := 0; y < r.Height; y++ {
-		for x := 0; x < r.Width; x++ {
-			color := colorCalculator(float64(s.Get(x, y)))
+	colorCalculator := colorCalculator(float64(conf.Iterations))
+	for x := 0; x < r.Width; x++ {
+		for y := 0; y < r.Height; y++ {
+			color := colorCalculator(float64(valueMap[x][y]))
 			img.Set(x, y, color)
 		}
 	}
 	return img
 }
 
-func colorCalculator(conf Config) func(i float64) color.RGBA {
-	iterations := float64(conf.Iterations)
+func colorCalculator(iterations float64) func(i float64) color.RGBA {
 	colorStep := 255.0 / iterations
 	iterationsHalf := iterations / 2.0
 	return func(i float64) color.RGBA {

@@ -17,9 +17,10 @@ type Config struct {
 	Iterations int
 }
 
-type IterationMapping struct {
-	mapping [][]int
+func (c Config) XStep() float64 {
+	return (c.Real.End - c.Real.Start) / float64(c.Resolution.Width)
 }
 
-func NewIterationMapping(mapping [][]int) IterationMapping { return IterationMapping{mapping} }
-func (im IterationMapping) Get(x int, y int) int           { return im.mapping[y][x] }
+func (c Config) YStep() float64 {
+	return (c.Imaginary.End - c.Imaginary.Start) / float64(c.Resolution.Height)
+}
