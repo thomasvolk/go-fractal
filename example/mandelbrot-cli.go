@@ -45,7 +45,7 @@ func drawHandler(conf fractal.Config) func(w http.ResponseWriter, r *http.Reques
 		forQueryParam(r, "ystart", func(value float64) { copyConf.Imaginary.Start = value })
 		forQueryParam(r, "yend", func(value float64) { copyConf.Imaginary.End = value })
 		forQueryParam(r, "iterations", func(value float64) { copyConf.Iterations = int(value) })
-		image := fractal.Image(copyConf, fractal.Mandelbrot(copyConf))
+		image := copyConf.Image(fractal.Mandelbrot)
 		png.Encode(w, image)
 	}
 }
@@ -88,7 +88,7 @@ func main() {
 			panic(err)
 		}
 	} else {
-		image := fractal.Image(conf, fractal.Mandelbrot(conf))
+		image := conf.Image(fractal.Mandelbrot)
 		writeFile(outputfile, image)
 	}
 }
