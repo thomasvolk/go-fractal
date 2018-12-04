@@ -34,10 +34,10 @@ func forQueryParam(r *http.Request, param string, f func(value float64)) {
 func drawHandler(m fractal.ComplexSet) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		mc := fractal.ComplexSet{
-			XRange:     fractal.Range{m.XRange.Start, m.XRange.End},
-			YRange:     fractal.Range{m.YRange.Start, m.YRange.End},
+			XRange:     fractal.Range{Start: m.XRange.Start, End: m.XRange.End},
+			YRange:     fractal.Range{Start: m.YRange.Start, End: m.YRange.End},
 			Iterations: m.Iterations,
-			Resolution: fractal.Resolution{m.Resolution.Width, m.Resolution.Height},
+			Resolution: fractal.Resolution{Width: m.Resolution.Width, Height: m.Resolution.Height},
 		}
 		w.Header().Set("Content-Type", "image/png")
 		forQueryParam(r, "xstart", func(value float64) { mc.XRange.Start = value })
@@ -76,10 +76,10 @@ func main() {
 	flag.Parse()
 
 	m := fractal.ComplexSet{
-		XRange:     fractal.Range{xstart, xend},
-		YRange:     fractal.Range{ystart, yend},
+		XRange:     fractal.Range{Start: xstart, End: xend},
+		YRange:     fractal.Range{Start: ystart, End: yend},
 		Iterations: iterations,
-		Resolution: fractal.Resolution{width, height},
+		Resolution: fractal.Resolution{Width: width, Height: height},
 	}
 
 	if serve {

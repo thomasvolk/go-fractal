@@ -11,7 +11,7 @@ func Mandelbrot(cs ComplexSet) IterationMapping {
 	yrange := cs.YRange
 	resultSet := make([][]int, r.Height)
 	xStep := (xrange.End - xrange.Start) / float64(r.Width)
-	yStep := (yrange.End - xrange.Start) / float64(r.Height)
+	yStep := (yrange.End - yrange.Start) / float64(r.Height)
 
 	var wg sync.WaitGroup
 	wg.Add(r.Width * r.Height)
