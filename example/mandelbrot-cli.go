@@ -9,7 +9,7 @@ import (
 	"os"
 	"strconv"
 
-	mandelbrot ".."
+	fractal ".."
 )
 
 func writeFile(outputfile string, image *image.RGBA) {
@@ -31,24 +31,21 @@ func forQueryParam(r *http.Request, param string, f func(value float64)) {
 	}
 }
 
-func drawHandler(m mandelbrot.Mandelbrot) func(w http.ResponseWriter, r *http.Request) {
+func drawHandler(m fractal.ComplexSet) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		mc := mandelbrot.Mandelbrot{
-			Xstart:     m.Xstart,
-			Xend:       m.Xend,
-			Ystart:     m.Ystart,
-			Yend:       m.Yend,
+		mc := fractal.ComplexSet{
+			XRange:     fractal.Range{m.XRange.Start, m.XRange.End},
+			YRange:     fractal.Range{m.YRange.Start, m.YRange.End},
 			Iterations: m.Iterations,
-			Width:      m.Width,
-			Height:     m.Height,
+			Resolution: fractal.Resolution{m.Resolution.Width, m.Resolution.Height},
 		}
 		w.Header().Set("Content-Type", "image/png")
-		forQueryParam(r, "xstart", func(value float64) { mc.Xstart = value })
-		forQueryParam(r, "xend", func(value float64) { mc.Xend = value })
-		forQueryParam(r, "ystart", func(value float64) { mc.Ystart = value })
-		forQueryParam(r, "yend", func(value float64) { mc.Yend = value })
+		forQueryParam(r, "xstart", func(value float64) { mc.XRange.Start = value })
+		forQueryParam(r, "xend", func(value float64) { mc.XRange.End = value })
+		forQueryParam(r, "ystart", func(value float64) { mc.YRange.Start = value })
+		forQueryParam(r, "yend", func(value float64) { mc.YRange.End = value })
 		forQueryParam(r, "iterations", func(value float64) { mc.Iterations = int(value) })
-		image := mc.Set().Image()
+		image := fractal.Image(mc, fractal.Mandelbrot(mc))
 		png.Encode(w, image)
 	}
 }
@@ -78,14 +75,11 @@ func main() {
 
 	flag.Parse()
 
-	m := mandelbrot.Mandelbrot{
-		Xstart:     xstart,
-		Xend:       xend,
-		Ystart:     ystart,
-		Yend:       yend,
+	m := fractal.ComplexSet{
+		XRange:     fractal.Range{xstart, xend},
+		YRange:     fractal.Range{ystart, yend},
 		Iterations: iterations,
-		Width:      width,
-		Height:     height,
+		Resolution: fractal.Resolution{width, height},
 	}
 
 	if serve {
@@ -94,7 +88,7 @@ func main() {
 			panic(err)
 		}
 	} else {
-		image := m.Set().Image()
+		image := fractal.Image(m, fractal.Mandelbrot(m))
 		writeFile(outputfile, image)
 	}
 }

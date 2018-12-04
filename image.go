@@ -1,24 +1,25 @@
-package mandelbrot
+package fractal
 
 import (
 	"image"
 	"image/color"
 )
 
-func (ms MandelbrotSet) Image() *image.RGBA {
-	img := image.NewRGBA(image.Rect(0, 0, ms.Width(), ms.Height()))
-	colorCalculator := ms.colorCalculator()
-	for y := 0; y < ms.Height(); y++ {
-		for x := 0; x < ms.Width(); x++ {
-			color := colorCalculator(float64(ms.Get(x, y)))
+func Image(cs ComplexSet, s IterationMapping) *image.RGBA {
+	r := cs.Resolution
+	img := image.NewRGBA(image.Rect(0, 0, r.Width, r.Height))
+	colorCalculator := colorCalculator(cs)
+	for y := 0; y < r.Height; y++ {
+		for x := 0; x < r.Width; x++ {
+			color := colorCalculator(float64(s.Get(x, y)))
 			img.Set(x, y, color)
 		}
 	}
 	return img
 }
 
-func (ms MandelbrotSet) colorCalculator() func(i float64) color.RGBA {
-	iterations := float64(ms.Iterations())
+func colorCalculator(cs ComplexSet) func(i float64) color.RGBA {
+	iterations := float64(cs.Iterations)
 	colorStep := 255.0 / iterations
 	iterationsHalf := iterations / 2.0
 	return func(i float64) color.RGBA {
