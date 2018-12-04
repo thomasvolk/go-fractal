@@ -24,3 +24,23 @@ func (c Config) XStep() float64 {
 func (c Config) YStep() float64 {
 	return (c.Imaginary.End - c.Imaginary.Start) / float64(c.Resolution.Height)
 }
+
+func (conf Config) Plane(algorithm func(x float64, y float64, iterations int) int) [][]int {
+	r := conf.Resolution
+	xStep := conf.XStep()
+	yStep := conf.YStep()
+
+	result := make([][]int, r.Width)
+
+	for x := 0; x < r.Width; x++ {
+		col := make([]int, r.Height)
+		for y := 0; y < r.Height; y++ {
+			cx := (float64(x) * xStep) + conf.Real.Start
+			cy := (float64(y) * yStep) + conf.Imaginary.Start
+			count := algorithm(cx, cy, conf.Iterations)
+			col[y] = count
+		}
+		result[x] = col
+	}
+	return result
+}

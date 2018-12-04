@@ -5,10 +5,10 @@ import (
 	"image/color"
 )
 
-func (c Config) Image(algorithm func(c Config) [][]int) *image.RGBA {
+func (c Config) Image(algorithm func(x float64, y float64, iterations int) int) *image.RGBA {
 	img := image.NewRGBA(image.Rect(0, 0, c.Resolution.Width, c.Resolution.Height))
 	colorCalculator := colorCalculator(float64(c.Iterations))
-	valueMap := algorithm(c)
+	valueMap := c.Plane(algorithm)
 	for x, col := range valueMap {
 		for y, val := range col {
 			color := colorCalculator(float64(val))
