@@ -10,22 +10,22 @@ type Resolution struct {
 	Height int
 }
 
-type Config struct {
+type ComplexSet struct {
 	Resolution Resolution
 	Real       Range
 	Imaginary  Range
 	Iterations int
 }
 
-func (c Config) XStep() float64 {
+func (c ComplexSet) XStep() float64 {
 	return (c.Real.End - c.Real.Start) / float64(c.Resolution.Width)
 }
 
-func (c Config) YStep() float64 {
+func (c ComplexSet) YStep() float64 {
 	return (c.Imaginary.End - c.Imaginary.Start) / float64(c.Resolution.Height)
 }
 
-func (conf Config) Plane(algorithm func(x float64, y float64, iterations int) int) [][]int {
+func (conf ComplexSet) Plane(algorithm func(x float64, y float64, iterations int) int) [][]int {
 	r := conf.Resolution
 	xStep := conf.XStep()
 	yStep := conf.YStep()

@@ -31,9 +31,9 @@ func forQueryParam(r *http.Request, param string, f func(value float64)) {
 	}
 }
 
-func drawHandler(conf fractal.Config) func(w http.ResponseWriter, r *http.Request) {
+func drawHandler(conf fractal.ComplexSet) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		copyConf := fractal.Config{
+		copyConf := fractal.ComplexSet{
 			Real:       fractal.Range{Start: conf.Real.Start, End: conf.Real.End},
 			Imaginary:  fractal.Range{Start: conf.Imaginary.Start, End: conf.Imaginary.End},
 			Iterations: conf.Iterations,
@@ -75,7 +75,7 @@ func main() {
 
 	flag.Parse()
 
-	conf := fractal.Config{
+	conf := fractal.ComplexSet{
 		Real:       fractal.Range{Start: xstart, End: xend},
 		Imaginary:  fractal.Range{Start: ystart, End: yend},
 		Iterations: iterations,
