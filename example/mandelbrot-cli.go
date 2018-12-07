@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"image"
 	"image/png"
 	"net/http"
@@ -31,25 +30,6 @@ func forQueryParam(r *http.Request, param string, f func(value float64)) {
 	}
 }
 
-func drawHandler(conf fractal.ComplexSet) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		copyConf := fractal.ComplexSet{
-			Real:       fractal.Range{Start: conf.Real.Start, End: conf.Real.End},
-			Imaginary:  fractal.Range{Start: conf.Imaginary.Start, End: conf.Imaginary.End},
-			Iterations: conf.Iterations,
-			Resolution: fractal.Resolution{Width: conf.Resolution.Width, Height: conf.Resolution.Height},
-		}
-		w.Header().Set("Content-Type", "image/png")
-		forQueryParam(r, "xstart", func(value float64) { copyConf.Real.Start = value })
-		forQueryParam(r, "xend", func(value float64) { copyConf.Real.End = value })
-		forQueryParam(r, "ystart", func(value float64) { copyConf.Imaginary.Start = value })
-		forQueryParam(r, "yend", func(value float64) { copyConf.Imaginary.End = value })
-		forQueryParam(r, "iterations", func(value float64) { copyConf.Iterations = int(value) })
-		image := copyConf.Image(fractal.Mandelbrot)
-		png.Encode(w, image)
-	}
-}
-
 func main() {
 	var xstart float64
 	var xend float64
@@ -59,7 +39,6 @@ func main() {
 	var width int
 	var height int
 	var outputfile string
-	var serve bool
 	var port int
 
 	flag.Float64Var(&xstart, "xstart", -2.0, "xstart")
@@ -70,25 +49,18 @@ func main() {
 	flag.IntVar(&width, "width", 400, "width")
 	flag.IntVar(&height, "height", 300, "height")
 	flag.StringVar(&outputfile, "outputfile", "mandelbrot.png", "outputfile")
-	flag.BoolVar(&serve, "serve", false, "start http server")
 	flag.IntVar(&port, "port", 8080, "http port")
 
 	flag.Parse()
 
-	conf := fractal.ComplexSet{
-		Real:       fractal.Range{Start: xstart, End: xend},
-		Imaginary:  fractal.Range{Start: ystart, End: yend},
-		Iterations: iterations,
-		Resolution: fractal.Resolution{Width: width, Height: height},
-	}
+	m := fractal.NewMandelbrot(
+		fractal.Range{Start: xstart, End: xend},
+		fractal.Range{Start: ystart, End: yend},
+	)
 
-	if serve {
-		http.HandleFunc("/", drawHandler(conf))
-		if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
-			panic(err)
-		}
-	} else {
-		image := conf.Image(fractal.Mandelbrot)
-		writeFile(outputfile, image)
-	}
+	r := fractal.Resolution{Width: width, Height: height}
+	p := fractal.NewPlane(m, r, iterations)
+	image := p.Image()
+	writeFile(outputfile, image)
+
 }

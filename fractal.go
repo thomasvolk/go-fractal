@@ -1,5 +1,11 @@
 package fractal
 
+type ComplexSet interface {
+	doRecursion(x float64, y float64, iterations int) int
+	Real() Range
+	Imaginary() Range
+}
+
 type Range struct {
 	Start float64
 	End   float64
@@ -10,37 +16,40 @@ type Resolution struct {
 	Height int
 }
 
-type ComplexSet struct {
-	Resolution Resolution
-	Real       Range
-	Imaginary  Range
-	Iterations int
+type Plane struct {
+	complexSet ComplexSet
+	resolution Resolution
+	iterations int
+	values     [][]int
 }
 
-func (c ComplexSet) XStep() float64 {
-	return (c.Real.End - c.Real.Start) / float64(c.Resolution.Width)
+func (p Plane) XStep() float64 {
+	return (p.complexSet.Real().End - p.complexSet.Real().Start) / float64(p.resolution.Width)
 }
 
-func (c ComplexSet) YStep() float64 {
-	return (c.Imaginary.End - c.Imaginary.Start) / float64(c.Resolution.Height)
+func (p Plane) YStep() float64 {
+	return (p.complexSet.Imaginary().End - p.complexSet.Imaginary().Start) / float64(p.resolution.Height)
 }
 
-func (conf ComplexSet) Plane(algorithm func(x float64, y float64, iterations int) int) [][]int {
-	r := conf.Resolution
-	xStep := conf.XStep()
-	yStep := conf.YStep()
+func NewPlane(complexSet ComplexSet, resolution Resolution, iterations int) Plane {
+	p := Plane{
+		complexSet: complexSet,
+		resolution: resolution,
+		iterations: iterations,
+		values:     make([][]int, resolution.Width),
+	}
+	xStep := p.XStep()
+	yStep := p.YStep()
 
-	result := make([][]int, r.Width)
-
-	for x := 0; x < r.Width; x++ {
-		col := make([]int, r.Height)
-		for y := 0; y < r.Height; y++ {
-			cx := (float64(x) * xStep) + conf.Real.Start
-			cy := (float64(y) * yStep) + conf.Imaginary.Start
-			count := algorithm(cx, cy, conf.Iterations)
+	for x := 0; x < p.resolution.Width; x++ {
+		col := make([]int, p.resolution.Height)
+		for y := 0; y < p.resolution.Height; y++ {
+			cx := (float64(x) * xStep) + p.complexSet.Real().Start
+			cy := (float64(y) * yStep) + p.complexSet.Imaginary().Start
+			count := p.complexSet.doRecursion(cx, cy, p.iterations)
 			col[y] = count
 		}
-		result[x] = col
+		p.values[x] = col
 	}
-	return result
+	return p
 }
