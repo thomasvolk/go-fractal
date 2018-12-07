@@ -24,9 +24,9 @@ func (p Plane) AutoZoom() Plane {
 		}
 	}
 	xstart := float64(bestFrame[0])*p.XStep() + p.complexSet.Real.Start
-	xend := float64(bestFrame[2])*p.XStep() + p.complexSet.Real.Start
+	xend := float64(bestFrame[2])*p.XStep() + xstart
 	ystart := float64(bestFrame[1])*p.YStep() + p.complexSet.Imaginary.Start
-	yend := float64(bestFrame[3])*p.YStep() + p.complexSet.Imaginary.Start
+	yend := float64(bestFrame[3])*p.YStep() + ystart
 	return p.Zoom(
 		Range{xstart, xend},
 		Range{ystart, yend},
