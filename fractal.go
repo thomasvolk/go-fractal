@@ -1,5 +1,7 @@
 package fractal
 
+import "sync"
+
 type ComplexSet struct {
 	Real      Range
 	Imaginary Range
@@ -45,15 +47,25 @@ func NewPlane(complexSet ComplexSet, resolution Resolution, iterations int) Plan
 	xStep := p.XStep()
 	yStep := p.YStep()
 
+	var wg sync.WaitGroup
+	wg.Add(p.resolution.Width * p.resolution.Height)
+
 	for x := 0; x < p.resolution.Width; x++ {
 		col := make([]int, p.resolution.Height)
 		for y := 0; y < p.resolution.Height; y++ {
 			cx := (float64(x) * xStep) + p.complexSet.Real.Start
 			cy := (float64(y) * yStep) + p.complexSet.Imaginary.Start
-			count := p.complexSet.Algorithm(cx, cy, p.iterations)
-			col[y] = count
+			go p.recursion(&wg, col, y, cx, cy)
+
 		}
 		p.values[x] = col
 	}
+	wg.Wait()
 	return p
+}
+
+func (p Plane) recursion(wg *sync.WaitGroup, col []int, y int, cx float64, cy float64) {
+	defer wg.Done()
+	count := p.complexSet.Algorithm(cx, cy, p.iterations)
+	col[y] = count
 }
