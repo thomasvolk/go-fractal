@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"image"
 	"image/png"
 	"net/http"
@@ -40,6 +41,7 @@ func main() {
 	var height int
 	var outputfile string
 	var port int
+	var zoom int
 
 	flag.Float64Var(&xstart, "xstart", -2.0, "xstart")
 	flag.Float64Var(&xend, "xend", 1.2, "xend")
@@ -50,17 +52,23 @@ func main() {
 	flag.IntVar(&height, "height", 300, "height")
 	flag.StringVar(&outputfile, "outputfile", "mandelbrot.png", "outputfile")
 	flag.IntVar(&port, "port", 8080, "http port")
+	flag.IntVar(&zoom, "zoom", 0, "zoom")
 
 	flag.Parse()
 
-	m := fractal.NewMandelbrot(
+	m := fractal.ComplexSet{
 		fractal.Range{Start: xstart, End: xend},
 		fractal.Range{Start: ystart, End: yend},
-	)
+		fractal.Mandelbrot,
+	}
 
 	r := fractal.Resolution{Width: width, Height: height}
 	p := fractal.NewPlane(m, r, iterations)
 	image := p.Image()
 	writeFile(outputfile, image)
-
+	for z := 0; z < zoom; z++ {
+		p = p.AutoZoom()
+		image = p.Image()
+		writeFile(fmt.Sprintf("%03d_%s", z, outputfile), image)
+	}
 }

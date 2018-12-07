@@ -6,4 +6,4 @@ test:
 	(cd .. && go test)
 
 clean:
-	rm -f mandelbrot-cli mandelbrot.png
+	rm -f mandelbrot-cli *.png
