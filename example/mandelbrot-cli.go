@@ -12,8 +12,8 @@ import (
 	fractal ".."
 )
 
-func writeFile(outputfile string, image *image.RGBA) {
-	f, err := os.Create(outputfile)
+func writeFile(num int, outputfile string, image *image.RGBA) {
+	f, err := os.Create(fmt.Sprintf("%03d_%s", num, outputfile))
 	if err != nil {
 		panic(err)
 	}
@@ -64,11 +64,9 @@ func main() {
 
 	r := fractal.Resolution{Width: width, Height: height}
 	p := fractal.NewPlane(m, r, iterations)
-	image := p.Image()
-	writeFile(outputfile, image)
+	writeFile(0, outputfile, p.Image())
 	for z := 0; z < zoom; z++ {
 		p = p.AutoZoom()
-		image = p.Image()
-		writeFile(fmt.Sprintf("%03d_%s", z, outputfile), image)
+		writeFile(z+1, outputfile, p.Image())
 	}
 }
