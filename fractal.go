@@ -69,3 +69,12 @@ func (p Plane) recursion(wg *sync.WaitGroup, col []int, y int, cx float64, cy fl
 	count := p.complexSet.Algorithm(cx, cy, p.iterations)
 	col[y] = count
 }
+
+func (p Plane) Copy(real Range, imaginary Range) Plane {
+	zoomSet := ComplexSet{
+		Real:      real,
+		Imaginary: imaginary,
+		Algorithm: p.complexSet.Algorithm,
+	}
+	return NewPlane(zoomSet, p.resolution, p.iterations)
+}

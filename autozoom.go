@@ -27,19 +27,10 @@ func (p Plane) AutoZoom() Plane {
 	xend := float64(bestFrame[2])*p.XStep() + xstart
 	ystart := float64(bestFrame[1])*p.YStep() + p.complexSet.Imaginary.Start
 	yend := float64(bestFrame[3])*p.YStep() + ystart
-	return p.Zoom(
+	return p.Copy(
 		Range{xstart, xend},
 		Range{ystart, yend},
 	)
-}
-
-func (p Plane) Zoom(real Range, imaginary Range) Plane {
-	zoomSet := ComplexSet{
-		Real:      real,
-		Imaginary: imaginary,
-		Algorithm: p.complexSet.Algorithm,
-	}
-	return NewPlane(zoomSet, p.resolution, p.iterations)
 }
 
 func deviation(plane [][]int) float64 {
