@@ -5,8 +5,8 @@ import (
 )
 
 func (p Plane) AutoZoom() Plane {
-	wHalf := p.grid.Width / 2
-	hHalf := p.grid.Height / 2
+	wHalf := p.width / 2
+	hHalf := p.height / 2
 	frames := [][]int{
 		[]int{0, 0, wHalf, hHalf},
 		[]int{wHalf, 0, wHalf, hHalf},

@@ -13,14 +13,10 @@ type Range struct {
 	End   float64
 }
 
-type Grid struct {
-	Width  int
-	Height int
-}
-
 type Plane struct {
 	complexSet ComplexSet
-	grid       Grid
+	width      int
+	height     int
 	iterations int
 	values     [][]int
 }
@@ -30,29 +26,30 @@ func (r Range) Add(o Range) Range {
 }
 
 func (p Plane) XStep() float64 {
-	return (p.complexSet.Real.End - p.complexSet.Real.Start) / float64(p.grid.Width)
+	return (p.complexSet.Real.End - p.complexSet.Real.Start) / float64(p.width)
 }
 
 func (p Plane) YStep() float64 {
-	return (p.complexSet.Imaginary.End - p.complexSet.Imaginary.Start) / float64(p.grid.Height)
+	return (p.complexSet.Imaginary.End - p.complexSet.Imaginary.Start) / float64(p.height)
 }
 
-func NewPlane(complexSet ComplexSet, grid Grid, iterations int) Plane {
+func NewPlane(complexSet ComplexSet, width int, heigth int, iterations int) Plane {
 	p := Plane{
 		complexSet: complexSet,
-		grid:       grid,
+		width:      width,
+		height:     heigth,
 		iterations: iterations,
-		values:     make([][]int, grid.Width),
+		values:     make([][]int, width),
 	}
 	xStep := p.XStep()
 	yStep := p.YStep()
 
 	var wg sync.WaitGroup
-	wg.Add(p.grid.Width * p.grid.Height)
+	wg.Add(p.width * p.height)
 
-	for x := 0; x < p.grid.Width; x++ {
-		col := make([]int, p.grid.Height)
-		for y := 0; y < p.grid.Height; y++ {
+	for x := 0; x < p.width; x++ {
+		col := make([]int, p.height)
+		for y := 0; y < p.height; y++ {
 			cx := (float64(x) * xStep) + p.complexSet.Real.Start
 			cy := (float64(y) * yStep) + p.complexSet.Imaginary.Start
 			go p.recursion(&wg, col, y, cx, cy)
@@ -80,5 +77,5 @@ func (p Plane) Crop(x int, y int, width int, height int) Plane {
 		Imaginary: Range{ystart, yend},
 		Algorithm: p.complexSet.Algorithm,
 	}
-	return NewPlane(zoomSet, p.grid, p.iterations)
+	return NewPlane(zoomSet, p.width, p.height, p.iterations)
 }
