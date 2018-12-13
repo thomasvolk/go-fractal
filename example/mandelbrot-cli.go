@@ -62,8 +62,8 @@ func main() {
 		fractal.Mandelbrot,
 	}
 
-	r := fractal.Resolution{Width: width, Height: height}
-	p := fractal.NewPlane(m, r, iterations)
+	g := fractal.Grid{Width: width, Height: height}
+	p := fractal.NewPlane(m, g, iterations)
 	writeFile(0, outputfile, p.Image())
 	for z := 0; z < zoom; z++ {
 		p = p.AutoZoom()

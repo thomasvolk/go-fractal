@@ -6,7 +6,7 @@ import (
 )
 
 func (p Plane) Image() *image.RGBA {
-	img := image.NewRGBA(image.Rect(0, 0, p.resolution.Width, p.resolution.Height))
+	img := image.NewRGBA(image.Rect(0, 0, p.grid.Width, p.grid.Height))
 	colorCalculator := colorCalculator(float64(p.iterations))
 	for x, col := range p.values {
 		for y, val := range col {
