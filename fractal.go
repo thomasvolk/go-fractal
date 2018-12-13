@@ -70,10 +70,14 @@ func (p Plane) recursion(wg *sync.WaitGroup, col []int, y int, cx float64, cy fl
 	col[y] = count
 }
 
-func (p Plane) Copy(real Range, imaginary Range) Plane {
+func (p Plane) Crop(x int, y int, width int, height int) Plane {
+	xstart := float64(x)*p.XStep() + p.complexSet.Real.Start
+	xend := float64(width)*p.XStep() + xstart
+	ystart := float64(y)*p.YStep() + p.complexSet.Imaginary.Start
+	yend := float64(height)*p.YStep() + ystart
 	zoomSet := ComplexSet{
-		Real:      real,
-		Imaginary: imaginary,
+		Real:      Range{xstart, xend},
+		Imaginary: Range{ystart, yend},
 		Algorithm: p.complexSet.Algorithm,
 	}
 	return NewPlane(zoomSet, p.resolution, p.iterations)
