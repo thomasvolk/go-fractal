@@ -27,15 +27,26 @@ func (p Plane) AutoZoom() Plane {
 }
 
 func innerBox(x int, y int, width int, height int) (int, int, int, int) {
-	newWidthHalf := (width - x)
-	newHeightHalf := (height - y)
-	if x < newWidthHalf {
-		newWidthHalf = x
+	xmin := (width - x)
+	ymin := (height - y)
+	if x < xmin {
+		xmin = x
 	}
-	if y < newHeightHalf {
-		newHeightHalf = y
+	if y < ymin {
+		ymin = y
 	}
-	return x - newWidthHalf, y - newHeightHalf, newWidthHalf * 2, newHeightHalf * 2
+	widthScaleFactor := float64(xmin*2) / float64(height)
+	heightScaleFactor := float64(ymin*2) / float64(height)
+	scaleFactor := 0.0
+	if widthScaleFactor < heightScaleFactor {
+		scaleFactor = widthScaleFactor
+	} else {
+		scaleFactor = heightScaleFactor
+	}
+	newWidth := int(float64(width) * scaleFactor)
+	newHeight := int(float64(height) * scaleFactor)
+
+	return x - newWidth/2, y - newHeight/2, newWidth, newHeight
 }
 
 func deviation(plane [][]int) float64 {
