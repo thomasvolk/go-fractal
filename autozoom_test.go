@@ -43,3 +43,22 @@ func TestDeviation(t *testing.T) {
 		t.Errorf("wrong deviation: %f != %f", expected, d)
 	}
 }
+
+func TestInnerBox(t *testing.T) {
+	x, y, w, h := innerBox(0, 0, 100, 100)
+	if x != 0 || y != 0 || w != 0 || h != 0 {
+		t.Errorf("innerBox result failure x=%d y=%d w=%d h%d", x, y, w, h)
+	}
+	x, y, w, h = innerBox(99, 99, 100, 100)
+	if x != 98 || y != 98 || w != 2 || h != 2 {
+		t.Errorf("innerBox result failure x=%d y=%d w=%d h%d", x, y, w, h)
+	}
+	x, y, w, h = innerBox(50, 50, 100, 100)
+	if x != 0 || y != 0 || w != 100 || h != 100 {
+		t.Errorf("innerBox result failure x=%d y=%d w=%d h%d", x, y, w, h)
+	}
+	x, y, w, h = innerBox(25, 75, 100, 100)
+	if x != 0 || y != 50 || w != 50 || h != 50 {
+		t.Errorf("innerBox result failure x=%d y=%d w=%d h%d", x, y, w, h)
+	}
+}

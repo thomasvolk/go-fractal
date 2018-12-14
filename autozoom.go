@@ -26,6 +26,18 @@ func (p Plane) AutoZoom() Plane {
 	return p.Crop(bestFrame[0], bestFrame[1], bestFrame[2], bestFrame[3])
 }
 
+func innerBox(x int, y int, width int, height int) (int, int, int, int) {
+	newWidthHalf := (width - x)
+	newHeightHalf := (height - y)
+	if x < newWidthHalf {
+		newWidthHalf = x
+	}
+	if y < newHeightHalf {
+		newHeightHalf = y
+	}
+	return x - newWidthHalf, y - newHeightHalf, newWidthHalf * 2, newHeightHalf * 2
+}
+
 func deviation(plane [][]int) float64 {
 	m := mean(plane)
 	sum := 0.0
