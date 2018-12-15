@@ -7,46 +7,49 @@ import (
 func (p Plane) AutoZoom() Plane {
 	wHalf := p.width / 2
 	hHalf := p.height / 2
-	frames := [][]int{
-		[]int{0, 0, wHalf, hHalf},
-		[]int{wHalf, 0, wHalf, hHalf},
-		[]int{wHalf, hHalf, wHalf, hHalf},
-		[]int{wHalf, 0, wHalf, hHalf},
+	frames := []Box{
+		Box{0, 0, wHalf, hHalf},
+		Box{wHalf, 0, wHalf, hHalf},
+		Box{wHalf, hHalf, wHalf, hHalf},
+		Box{wHalf, 0, wHalf, hHalf},
 	}
 	currentDeviation := 0.0
 	bestFrame := frames[0]
 	for _, f := range frames {
-		part := part(p.values, f[0], f[1], f[2], f[3])
+		part := part(p.values, f)
 		d := deviation(part)
 		if d > currentDeviation {
 			currentDeviation = d
 			bestFrame = f
 		}
 	}
-	return p.Crop(bestFrame[0], bestFrame[1], bestFrame[2], bestFrame[3])
+	return p.Crop(bestFrame)
 }
 
-func innerBox(x int, y int, width int, height int) (int, int, int, int) {
-	xmin := (width - x)
-	ymin := (height - y)
-	if x < xmin {
-		xmin = x
+func innerBox(x int, y int, outer Box) Box {
+	nx := (x - outer.x)
+	ny := (y - outer.y)
+	xmin := (outer.width - nx)
+	ymin := (outer.height - ny)
+	if nx < xmin {
+		xmin = nx
 	}
-	if y < ymin {
-		ymin = y
+	if ny < ymin {
+		ymin = ny
 	}
-	widthScaleFactor := float64(xmin*2) / float64(height)
-	heightScaleFactor := float64(ymin*2) / float64(height)
-	scaleFactor := 0.0
+
+	widthScaleFactor := float64(xmin*2) / float64(outer.height)
+	heightScaleFactor := float64(ymin*2) / float64(outer.height)
+
+	scaleFactor := heightScaleFactor
 	if widthScaleFactor < heightScaleFactor {
 		scaleFactor = widthScaleFactor
-	} else {
-		scaleFactor = heightScaleFactor
 	}
-	newWidth := int(float64(width) * scaleFactor)
-	newHeight := int(float64(height) * scaleFactor)
 
-	return x - newWidth/2, y - newHeight/2, newWidth, newHeight
+	newWidth := int(float64(outer.width) * scaleFactor)
+	newHeight := int(float64(outer.height) * scaleFactor)
+
+	return Box{x - newWidth/2, y - newHeight/2, newWidth, newHeight}
 }
 
 func deviation(plane [][]int) float64 {
@@ -74,15 +77,15 @@ func mean(plane [][]int) float64 {
 	return float64(sum) / float64(count)
 }
 
-func part(plane [][]int, xoffset int, yoffset int, width int, height int) [][]int {
-	part := make([][]int, width)
+func part(plane [][]int, box Box) [][]int {
+	part := make([][]int, box.width)
 	for x, col := range plane {
-		px := x - xoffset
-		if px >= 0 && px < width {
-			partCol := make([]int, height)
+		px := x - box.x
+		if px >= 0 && px < box.width {
+			partCol := make([]int, box.height)
 			for y, val := range col {
-				py := y - yoffset
-				if py >= 0 && py < height {
+				py := y - box.y
+				if py >= 0 && py < box.height {
 					partCol[py] = val
 				}
 			}

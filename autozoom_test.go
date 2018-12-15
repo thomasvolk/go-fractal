@@ -10,7 +10,7 @@ func TestPart(t *testing.T) {
 		[]int{10, 20, 30, 40},
 		[]int{100, 200, 300, 400},
 		[]int{1000, 2000, 3000, 4000}}
-	part := part(src, 1, 1, 2, 2)
+	part := part(src, Box{1, 1, 2, 2})
 	expected := [][]int{[]int{20, 30}, []int{200, 300}}
 	if !reflect.DeepEqual(part, expected) {
 		t.Errorf("part has not the expected layout: %v != %v", expected, part)
@@ -45,24 +45,29 @@ func TestDeviation(t *testing.T) {
 }
 
 func TestInnerBox(t *testing.T) {
-	x, y, w, h := innerBox(0, 0, 100, 100)
-	if x != 0 || y != 0 || w != 0 || h != 0 {
-		t.Errorf("innerBox result failure x=%d y=%d w=%d h=%d", x, y, w, h)
+	box := Box{0, 0, 100, 100}
+	ib := innerBox(0, 0, box)
+	if (ib != Box{0, 0, 0, 0}) {
+		t.Errorf("innerBox result failure %s", ib)
 	}
-	x, y, w, h = innerBox(99, 99, 100, 100)
-	if x != 98 || y != 98 || w != 2 || h != 2 {
-		t.Errorf("innerBox result failure x=%d y=%d w=%d h=%d", x, y, w, h)
+	ib = innerBox(99, 99, box)
+	if (ib != Box{98, 98, 2, 2}) {
+		t.Errorf("innerBox result failure %s", ib)
 	}
-	x, y, w, h = innerBox(50, 50, 100, 100)
-	if x != 0 || y != 0 || w != 100 || h != 100 {
-		t.Errorf("innerBox result failure x=%d y=%d w=%d h=%d", x, y, w, h)
+	ib = innerBox(50, 50, box)
+	if (ib != Box{0, 0, 100, 100}) {
+		t.Errorf("innerBox result failure %s", ib)
 	}
-	x, y, w, h = innerBox(25, 75, 100, 100)
-	if x != 0 || y != 50 || w != 50 || h != 50 {
-		t.Errorf("innerBox result failure x=%d y=%d w=%d h=%d", x, y, w, h)
+	ib = innerBox(25, 75, box)
+	if (ib != Box{0, 50, 50, 50}) {
+		t.Errorf("innerBox result failure %s", ib)
 	}
-	x, y, w, h = innerBox(2, 75, 100, 100)
-	if x != 0 || y != 73 || w != 4 || h != 4 {
-		t.Errorf("innerBox result failure x=%d y=%d w=%d h=%d", x, y, w, h)
+	ib = innerBox(2, 75, box)
+	if (ib != Box{0, 73, 4, 4}) {
+		t.Errorf("innerBox result failure %s", ib)
+	}
+	ib = innerBox(60, 60, Box{10, 10, 100, 100})
+	if (ib != Box{10, 10, 100, 100}) {
+		t.Errorf("innerBox result failure %s", ib)
 	}
 }
