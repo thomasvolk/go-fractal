@@ -5,14 +5,21 @@ import (
 )
 
 func (p Plane) AutoZoom() Plane {
-	wHalf := p.width / 2
-	hHalf := p.height / 2
-	frames := []Box{
-		Box{0, 0, wHalf, hHalf},
-		Box{wHalf, 0, wHalf, hHalf},
-		Box{wHalf, hHalf, wHalf, hHalf},
-		Box{wHalf, 0, wHalf, hHalf},
+	return p.RasterZoom(2)
+}
+
+func (p Plane) RasterZoom(division int) Plane {
+	wd := p.width / division
+	hd := p.height / division
+
+	boxes := division * 2
+	frames := make([]Box, boxes)
+	for f := 0; f < boxes; f++ {
+		x := (f * wd) % p.width
+		y := (f * hd) % p.height
+		frames[f] = Box{x, y, wd, hd}
 	}
+
 	currentDeviation := 0.0
 	bestFrame := frames[0]
 	for _, f := range frames {
