@@ -4,15 +4,11 @@ import (
 	"math"
 )
 
-func (p Plane) AutoZoom() Plane {
-	return p.RasterZoom(2)
-}
-
-func (p Plane) RasterZoom(division int) Plane {
+func (p Plane) RasterAutoZoom(division int) Plane {
 	wd := p.width / division
 	hd := p.height / division
 
-	boxes := division * 2
+	boxes := division * division
 	frames := make([]Box, boxes)
 	for f := 0; f < boxes; f++ {
 		x := (f * wd) % p.width
