@@ -39,6 +39,14 @@ func (r Range) Add(o Range) Range {
 	return Range{r.Start + o.Start, r.End + o.End}
 }
 
+func (p Plane) Width() int {
+	return p.width
+}
+
+func (p Plane) Height() int {
+	return p.height
+}
+
 func (p Plane) XStep() float64 {
 	return (p.complexSet.Real.End - p.complexSet.Real.Start) / float64(p.width)
 }

@@ -13,7 +13,31 @@ import (
 	fractal ".."
 )
 
-func getAutoZoomMethod(zoomConfig string) func(fractal.Plane) fractal.Plane {
+type Zoomer interface {
+	Zoom(fractal.Plane) fractal.Plane
+}
+
+type RasterAutoZoom struct {
+	division int
+}
+
+type CircleAutoZoom struct {
+	x int
+	y int
+}
+
+func (r RasterAutoZoom) Zoom(p fractal.Plane) fractal.Plane {
+	return p.RasterAutoZoom(r.division)
+}
+
+func (c CircleAutoZoom) Zoom(p fractal.Plane) fractal.Plane {
+	newPlane := p.CircleAutoZoom(c.x, c.y)
+	c.x = newPlane.Width() / 2
+	c.y = newPlane.Height() / 2
+	return newPlane
+}
+
+func getZoomer(zoomConfig string) Zoomer {
 	zoom := strings.Split(zoomConfig, ":")
 	zoomType := zoom[0]
 	if zoomType == "raster" {
@@ -21,15 +45,24 @@ func getAutoZoomMethod(zoomConfig string) func(fractal.Plane) fractal.Plane {
 		if err != nil {
 			panic(err)
 		}
-		return func(p fractal.Plane) fractal.Plane {
-			return p.RasterAutoZoom(division)
+		return RasterAutoZoom{division}
+	}
+	if zoomType == "circle" {
+		x, err := strconv.Atoi(zoom[1])
+		if err != nil {
+			panic(err)
 		}
+		y, err := strconv.Atoi(zoom[2])
+		if err != nil {
+			panic(err)
+		}
+		return CircleAutoZoom{x, y}
 	}
 	panic(fmt.Sprintf("unknown zoom type: %s\n", zoomType))
 }
 
-func writeFile(num int, outputfile string, image *image.RGBA) {
-	f, err := os.Create(fmt.Sprintf("%03d_%s", num, outputfile))
+func writeFile(num int, outputdir string, image *image.RGBA) {
+	f, err := os.Create(fmt.Sprintf("%s/%03d_mandelbrot.png", outputdir, num))
 	if err != nil {
 		panic(err)
 	}
@@ -55,7 +88,7 @@ func main() {
 	var iterations int
 	var width int
 	var height int
-	var outputfile string
+	var outputdir string
 	var port int
 	var zoom int
 	var zoomConfig string
@@ -67,7 +100,7 @@ func main() {
 	flag.IntVar(&iterations, "iterations", 100, "iterations")
 	flag.IntVar(&width, "width", 400, "width")
 	flag.IntVar(&height, "height", 300, "height")
-	flag.StringVar(&outputfile, "outputfile", "mandelbrot.png", "outputfile")
+	flag.StringVar(&outputdir, "outputdir", ".", "outputdir")
 	flag.IntVar(&port, "port", 8080, "http port")
 	flag.IntVar(&zoom, "zoom", 0, "zoom")
 	flag.StringVar(&zoomConfig, "zoom-config", "raster:2", "zoom type [raster:N] default is raster:2")
@@ -81,11 +114,11 @@ func main() {
 	}
 
 	p := fractal.NewPlane(m, width, height, iterations)
-	writeFile(0, outputfile, p.Image())
+	writeFile(0, outputdir, p.Image())
 
-	autoZoom := getAutoZoomMethod(zoomConfig)
+	zoomer := getZoomer(zoomConfig)
 	for z := 0; z < zoom; z++ {
-		p = autoZoom(p)
-		writeFile(z+1, outputfile, p.Image())
+		p = zoomer.Zoom(p)
+		writeFile(z+1, outputdir, p.Image())
 	}
 }

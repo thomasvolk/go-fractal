@@ -1,3 +1,4 @@
 mandelbrot-cli
 *.png
 .directory
+result

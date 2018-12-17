@@ -4,6 +4,26 @@ import (
 	"math"
 )
 
+func (p Plane) CircleAutoZoom(x int, y int) Plane {
+	box := innerBox(x, y, Box{0, 0, p.width, p.height})
+	rx := float64(box.width) / 3.0
+	ry := float64(box.height) / 3.0
+	currentDeviation := 0.0
+	bestFrame := box
+	for theta := 0.0; theta < 360.0; theta += 6 {
+		px := x + int(rx*math.Cos(theta))
+		py := y + int(ry*math.Sin(theta))
+		frame := innerBox(px, py, box)
+		part := part(p.values, frame)
+		d := deviation(part)
+		if d > currentDeviation {
+			currentDeviation = d
+			bestFrame = frame
+		}
+	}
+	return p.Crop(bestFrame)
+}
+
 func (p Plane) RasterAutoZoom(division int) Plane {
 	wd := p.width / division
 	hd := p.height / division
