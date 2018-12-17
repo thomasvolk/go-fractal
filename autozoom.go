@@ -6,8 +6,8 @@ import (
 
 func (p Plane) CircleAutoZoom(x int, y int) Plane {
 	box := innerBox(x, y, Box{0, 0, p.width, p.height})
-	rx := float64(box.width) / 3.0
-	ry := float64(box.height) / 3.0
+	rx := float64(box.width) / 5.0
+	ry := float64(box.height) / 5.0
 	currentDeviation := 0.0
 	bestFrame := box
 	for theta := 0.0; theta < 360.0; theta += 6 {

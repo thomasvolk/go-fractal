@@ -8,7 +8,7 @@ test:
 	(cd .. && go test)
 
 clean:
-	rm -f mandelbrot-cli *.png result
+	rm -rf mandelbrot-cli *.png result
 
 test-run: build
 	mkdir -p result/default/
