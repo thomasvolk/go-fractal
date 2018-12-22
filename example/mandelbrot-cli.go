@@ -124,9 +124,9 @@ func main() {
 	flag.Parse()
 
 	m := fractal.ComplexSet{
-		fractal.Range{Start: xstart, End: xend},
-		fractal.Range{Start: ystart, End: yend},
-		fractal.Mandelbrot,
+		Real:      fractal.Range{Start: xstart, End: xend},
+		Imaginary: fractal.Range{Start: ystart, End: yend},
+		Algorithm: fractal.Mandelbrot,
 	}
 
 	p := fractal.NewPlane(m, width, height, iterations)
