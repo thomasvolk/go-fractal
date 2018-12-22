@@ -4,13 +4,13 @@ import (
 	"math"
 )
 
-func (p Plane) CircleAutoZoom(x int, y int) Plane {
+func (p Plane) CircleAutoZoom(x int, y int, radiusDivisor float64, angleStep float64) Plane {
 	box := innerBox(x, y, Box{0, 0, p.width, p.height})
-	rx := float64(box.width) / 5.0
-	ry := float64(box.height) / 5.0
+	rx := float64(box.width) / radiusDivisor
+	ry := float64(box.height) / radiusDivisor
 	currentDeviation := 0.0
 	bestFrame := box
-	for theta := 0.0; theta < 360.0; theta += 6 {
+	for theta := 0.0; theta < 360.0; theta += angleStep {
 		px := x + int(rx*math.Cos(theta))
 		py := y + int(ry*math.Sin(theta))
 		frame := innerBox(px, py, box)

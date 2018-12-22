@@ -22,8 +22,10 @@ type RasterAutoZoom struct {
 }
 
 type CircleAutoZoom struct {
-	x int
-	y int
+	x             int
+	y             int
+	radiusDivisor int
+	angleStep     int
 }
 
 func (r RasterAutoZoom) Zoom(p fractal.Plane) fractal.Plane {
@@ -31,7 +33,7 @@ func (r RasterAutoZoom) Zoom(p fractal.Plane) fractal.Plane {
 }
 
 func (c CircleAutoZoom) Zoom(p fractal.Plane) fractal.Plane {
-	newPlane := p.CircleAutoZoom(c.x, c.y)
+	newPlane := p.CircleAutoZoom(c.x, c.y, float64(c.radiusDivisor), float64(c.angleStep))
 	c.x = newPlane.Width() / 2
 	c.y = newPlane.Height() / 2
 	return newPlane
@@ -56,7 +58,21 @@ func getZoomer(zoomConfig string) Zoomer {
 		if err != nil {
 			panic(err)
 		}
-		return CircleAutoZoom{x, y}
+		radiusDivisor := 5
+		if len(zoom) > 3 {
+			radiusDivisor, err = strconv.Atoi(zoom[3])
+			if err != nil {
+				panic(err)
+			}
+		}
+		angleStep := 6
+		if len(zoom) > 4 {
+			angleStep, err = strconv.Atoi(zoom[4])
+			if err != nil {
+				panic(err)
+			}
+		}
+		return CircleAutoZoom{x, y, radiusDivisor, angleStep}
 	}
 	panic(fmt.Sprintf("unknown zoom type: %s\n", zoomType))
 }
