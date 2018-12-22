@@ -39,12 +39,20 @@ func (r Range) Add(o Range) Range {
 	return Range{r.Start + o.Start, r.End + o.End}
 }
 
+func (r Range) String() string {
+	return fmt.Sprintf("%v-%v", r.Start, r.End)
+}
+
 func (p Plane) Width() int {
 	return p.width
 }
 
 func (p Plane) Height() int {
 	return p.height
+}
+
+func (p Plane) ComplexSet() ComplexSet {
+	return p.complexSet
 }
 
 func (p Plane) XStep() float64 {

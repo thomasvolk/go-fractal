@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"image"
 	"image/png"
 	"net/http"
 	"os"
@@ -77,13 +76,14 @@ func getZoomer(zoomConfig string) Zoomer {
 	panic(fmt.Sprintf("unknown zoom type: %s\n", zoomType))
 }
 
-func writeFile(num int, outputdir string, image *image.RGBA) {
-	f, err := os.Create(fmt.Sprintf("%s/%03d_mandelbrot.png", outputdir, num))
+func writeFile(num int, outputdir string, plane *fractal.Plane) {
+	cs := plane.ComplexSet()
+	f, err := os.Create(fmt.Sprintf("%s/%03d_%s_%s.png", outputdir, num, cs.Real, cs.Imaginary))
 	if err != nil {
 		panic(err)
 	}
 	defer f.Close()
-	png.Encode(f, image)
+	png.Encode(f, plane.Image())
 }
 
 func forQueryParam(r *http.Request, param string, f func(value float64)) {
@@ -130,11 +130,11 @@ func main() {
 	}
 
 	p := fractal.NewPlane(m, width, height, iterations)
-	writeFile(0, outputdir, p.Image())
+	writeFile(0, outputdir, &p)
 
 	zoomer := getZoomer(zoomConfig)
 	for z := 0; z < zoom; z++ {
 		p = zoomer.Zoom(p)
-		writeFile(z+1, outputdir, p.Image())
+		writeFile(z+1, outputdir, &p)
 	}
 }
