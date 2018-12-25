@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	fractal ".."
+	fractal "../.."
 )
 
 type Zoomer interface {

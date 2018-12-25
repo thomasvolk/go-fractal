@@ -5,7 +5,7 @@ build: test
 	go build mandelbrot-cli.go
 
 test:
-	(cd .. && go test)
+	(cd ../.. && go test)
 
 clean:
 	rm -rf mandelbrot-cli *.png result
