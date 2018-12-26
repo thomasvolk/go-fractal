@@ -35,10 +35,6 @@ type Plane struct {
 	values     [][]int
 }
 
-func (r Range) Add(o Range) Range {
-	return Range{r.Start + o.Start, r.End + o.End}
-}
-
 func (r Range) String() string {
 	return fmt.Sprintf("%v-%v", r.Start, r.End)
 }
