@@ -39,6 +39,10 @@ func (r Range) String() string {
 	return fmt.Sprintf("%v-%v", r.Start, r.End)
 }
 
+func (r Range) Length() float64 {
+	return r.End - r.Start
+}
+
 func (p Plane) Width() int {
 	return p.width
 }
@@ -52,11 +56,15 @@ func (p Plane) ComplexSet() ComplexSet {
 }
 
 func (p Plane) XStep() float64 {
-	return (p.complexSet.Real.End - p.complexSet.Real.Start) / float64(p.width)
+	return p.complexSet.Real.Length() / float64(p.width)
 }
 
 func (p Plane) YStep() float64 {
-	return (p.complexSet.Imaginary.End - p.complexSet.Imaginary.Start) / float64(p.height)
+	return p.complexSet.Imaginary.Length() / float64(p.height)
+}
+
+func NewRange(center float64, radius float64) Range {
+	return Range{center - radius, center + radius}
 }
 
 func NewPlane(complexSet ComplexSet, width int, heigth int, iterations int) Plane {

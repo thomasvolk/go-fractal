@@ -97,10 +97,10 @@ func forQueryParam(r *http.Request, param string, f func(value float64)) {
 }
 
 func main() {
-	var xstart float64
-	var xend float64
-	var ystart float64
-	var yend float64
+	var x float64
+	var xradius float64
+	var y float64
+	var yradius float64
 	var iterations int
 	var width int
 	var height int
@@ -109,10 +109,10 @@ func main() {
 	var zoom int
 	var zoomConfig string
 
-	flag.Float64Var(&xstart, "xstart", -2.0, "xstart")
-	flag.Float64Var(&xend, "xend", 1.2, "xend")
-	flag.Float64Var(&ystart, "ystart", -1.2, "ystart")
-	flag.Float64Var(&yend, "yend", 1.2, "yend")
+	flag.Float64Var(&x, "x", -0.4, "xstart")
+	flag.Float64Var(&xradius, "xradius", 1.6, "xradius")
+	flag.Float64Var(&y, "y", 0.0, "ystart")
+	flag.Float64Var(&yradius, "yradius", 1.2, "yradius")
 	flag.IntVar(&iterations, "iterations", 100, "iterations")
 	flag.IntVar(&width, "width", 400, "width")
 	flag.IntVar(&height, "height", 300, "height")
@@ -124,8 +124,8 @@ func main() {
 	flag.Parse()
 
 	m := fractal.ComplexSet{
-		Real:      fractal.Range{Start: xstart, End: xend},
-		Imaginary: fractal.Range{Start: ystart, End: yend},
+		Real:      fractal.NewRange(x, xradius),
+		Imaginary: fractal.NewRange(y, yradius),
 		Algorithm: fractal.Mandelbrot,
 	}
 
