@@ -78,7 +78,7 @@ func getZoomer(zoomConfig string) Zoomer {
 
 func writeFile(num int, outputdir string, plane *fractal.Plane) {
 	cs := plane.ComplexSet()
-	f, err := os.Create(fmt.Sprintf("%s/%03d_%s_%s.png", outputdir, num, cs.Real, cs.Imaginary))
+	f, err := os.Create(fmt.Sprintf("%s/%03d_Real_%s_Imag_%s.png", outputdir, num, cs.Real, cs.Imaginary))
 	if err != nil {
 		panic(err)
 	}
@@ -109,7 +109,7 @@ func main() {
 	var zoom int
 	var zoomConfig string
 
-	flag.Float64Var(&x, "x", -0.4, "xstart")
+	flag.Float64Var(&x, "x", -0.6, "xstart")
 	flag.Float64Var(&xradius, "xradius", 1.6, "xradius")
 	flag.Float64Var(&y, "y", 0.0, "ystart")
 	flag.Float64Var(&yradius, "yradius", 1.2, "yradius")

@@ -36,7 +36,15 @@ type Plane struct {
 }
 
 func (r Range) String() string {
-	return fmt.Sprintf("%v-%v", r.Start, r.End)
+	return fmt.Sprintf("C%v-R%v", r.Center(), r.Radius())
+}
+
+func (r Range) Center() float64 {
+	return r.Start + r.Radius()
+}
+
+func (r Range) Radius() float64 {
+	return r.Length() / 2.0
 }
 
 func (r Range) Length() float64 {
