@@ -13,6 +13,26 @@ type Plane struct {
 	values     [][]int
 }
 
+func (p Plane) Width() int {
+	return p.width
+}
+
+func (p Plane) Height() int {
+	return p.height
+}
+
+func (p Plane) ComplexSet() ComplexSet {
+	return p.complexSet
+}
+
+func (p Plane) XStep() float64 {
+	return p.complexSet.Real.Length() / float64(p.width)
+}
+
+func (p Plane) YStep() float64 {
+	return p.complexSet.Imaginary.Length() / float64(p.height)
+}
+
 func (p Plane) Deviation() float64 {
 	return deviation(p.values)
 }
