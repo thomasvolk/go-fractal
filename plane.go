@@ -2,7 +2,6 @@ package fractal
 
 import (
 	"math"
-	"sync"
 )
 
 type Plane struct {
@@ -78,12 +77,6 @@ func crop(plane [][]int, box Box) [][]int {
 		}
 	}
 	return part
-}
-
-func (p Plane) recursion(wg *sync.WaitGroup, col []int, y int, cx float64, cy float64) {
-	defer wg.Done()
-	count := p.complexSet.Algorithm(cx, cy, p.iterations)
-	col[y] = count
 }
 
 func (p Plane) Crop(b Box) Plane {

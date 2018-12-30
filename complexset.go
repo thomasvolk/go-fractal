@@ -29,11 +29,17 @@ func (complexSet ComplexSet) Plane(width int, heigth int, iterations int) Plane 
 		for y := 0; y < p.height; y++ {
 			cx := (float64(x) * xStep) + p.complexSet.Real.Start
 			cy := (float64(y) * yStep) + p.complexSet.Imaginary.Start
-			go p.recursion(&wg, col, y, cx, cy)
+			go complexSet.recursion(&wg, col, y, cx, cy, iterations)
 
 		}
 		p.values[x] = col
 	}
 	wg.Wait()
 	return p
+}
+
+func (complexSet ComplexSet) recursion(wg *sync.WaitGroup, col []int, y int, cx float64, cy float64, iterations int) {
+	defer wg.Done()
+	count := complexSet.Algorithm(cx, cy, iterations)
+	col[y] = count
 }
