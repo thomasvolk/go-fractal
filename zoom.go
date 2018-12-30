@@ -1,20 +1,9 @@
 package fractal
 
-import (
-	"math"
-)
+import "math"
 
 func (p Plane) CircleAutoZoom(x int, y int, radiusDivisor float64, angleStep float64) Plane {
-	box := Box{0, 0, p.width, p.height}.InnerBox(x, y)
-	rx := float64(box.Width) / radiusDivisor
-	ry := float64(box.Height) / radiusDivisor
-	var frames []Plane
-	for theta := 0.0; theta < 360.0; theta += angleStep {
-		px := x + int(rx*math.Cos(theta))
-		py := y + int(ry*math.Sin(theta))
-		frames = append(frames, p.Crop(box.InnerBox(px, py)))
-	}
-
+	frames := p.CircleFrames(x, y, radiusDivisor, angleStep)
 	currentDeviation := 0.0
 	bestFrame := p
 	for _, frame := range frames {
@@ -28,17 +17,21 @@ func (p Plane) CircleAutoZoom(x int, y int, radiusDivisor float64, angleStep flo
 	return bestFrame
 }
 
-func (p Plane) RasterAutoZoom(division int) Plane {
-	wd := p.width / division
-	hd := p.height / division
-	boxes := division * division
-	frames := make([]Plane, boxes)
-	for f := 0; f < boxes; f++ {
-		x := (f * wd) % p.width
-		y := (f * hd) % p.height
-		frames[f] = p.Crop(Box{x, y, wd, hd})
+func (p Plane) CircleFrames(x int, y int, radiusDivisor float64, angleStep float64) []Plane {
+	box := Box{0, 0, p.width, p.height}.InnerBox(x, y)
+	rx := float64(box.Width) / radiusDivisor
+	ry := float64(box.Height) / radiusDivisor
+	var frames []Plane
+	for theta := 0.0; theta < 360.0; theta += angleStep {
+		px := x + int(rx*math.Cos(theta))
+		py := y + int(ry*math.Sin(theta))
+		frames = append(frames, p.Crop(box.InnerBox(px, py)))
 	}
+	return frames
+}
 
+func (p Plane) RasterAutoZoom(division int) Plane {
+	frames := p.RasterFrames(division)
 	currentDeviation := 0.0
 	bestFrame := p
 	for _, f := range frames {
@@ -49,4 +42,17 @@ func (p Plane) RasterAutoZoom(division int) Plane {
 		}
 	}
 	return bestFrame
+}
+
+func (p Plane) RasterFrames(division int) []Plane {
+	wd := p.width / division
+	hd := p.height / division
+	boxes := division * division
+	frames := make([]Plane, boxes)
+	for f := 0; f < boxes; f++ {
+		x := (f * wd) % p.width
+		y := (f * hd) % p.height
+		frames[f] = p.Crop(Box{x, y, wd, hd})
+	}
+	return frames
 }
