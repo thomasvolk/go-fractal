@@ -2,7 +2,16 @@ package fractal
 
 import (
 	"math"
+	"sync"
 )
+
+type Plane struct {
+	complexSet ComplexSet
+	width      int
+	height     int
+	iterations int
+	values     [][]int
+}
 
 func (p Plane) Deviation() float64 {
 	return deviation(p.values)
@@ -49,4 +58,33 @@ func crop(plane [][]int, box Box) [][]int {
 		}
 	}
 	return part
+}
+
+func (p Plane) recursion(wg *sync.WaitGroup, col []int, y int, cx float64, cy float64) {
+	defer wg.Done()
+	count := p.complexSet.Algorithm(cx, cy, p.iterations)
+	col[y] = count
+}
+
+func (p Plane) Crop(b Box) Plane {
+	xstart := float64(b.X)*p.XStep() + p.complexSet.Real.Start
+	xend := float64(b.Width)*p.XStep() + xstart
+	ystart := float64(b.Y)*p.YStep() + p.complexSet.Imaginary.Start
+	yend := float64(b.Height)*p.YStep() + ystart
+	zoomSet := ComplexSet{
+		Real:      Range{xstart, xend},
+		Imaginary: Range{ystart, yend},
+		Algorithm: p.complexSet.Algorithm,
+	}
+	return Plane{
+		complexSet: zoomSet,
+		width:      b.Width,
+		height:     b.Height,
+		iterations: p.iterations,
+		values:     crop(p.values, b),
+	}
+}
+
+func (p Plane) Scale(width int, height int) Plane {
+	return p.complexSet.Plane(width, height, p.iterations)
 }
