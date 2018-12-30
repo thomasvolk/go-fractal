@@ -1,6 +1,10 @@
 package fractal
 
-import "testing"
+import (
+	"testing"
+
+	model "./model"
+)
 
 func TestXStepYStep(t *testing.T) {
 	c := ComplexSet{
@@ -28,7 +32,7 @@ func TestCrop(t *testing.T) {
 		Algorithm: Mandelbrot,
 	}
 	p := NewPlane(c, 300, 200, 10)
-	pc := p.Crop(Box{0, 0, 150, 100})
+	pc := p.Crop(model.Box{0, 0, 150, 100})
 
 	expected := 0.005
 	result := pc.XStep()

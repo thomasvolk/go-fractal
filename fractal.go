@@ -3,18 +3,9 @@ package fractal
 import (
 	"fmt"
 	"sync"
+
+	model "./model"
 )
-
-type Box struct {
-	x      int
-	y      int
-	width  int
-	height int
-}
-
-func (b Box) String() string {
-	return fmt.Sprintf("Box(x=%d, y=%d, w=%d, h=%d)", b.x, b.y, b.width, b.height)
-}
 
 type ComplexSet struct {
 	Real      Range
@@ -109,11 +100,11 @@ func (p Plane) recursion(wg *sync.WaitGroup, col []int, y int, cx float64, cy fl
 	col[y] = count
 }
 
-func (p Plane) Crop(b Box) Plane {
-	xstart := float64(b.x)*p.XStep() + p.complexSet.Real.Start
-	xend := float64(b.width)*p.XStep() + xstart
-	ystart := float64(b.y)*p.YStep() + p.complexSet.Imaginary.Start
-	yend := float64(b.height)*p.YStep() + ystart
+func (p Plane) Crop(b model.Box) Plane {
+	xstart := float64(b.X)*p.XStep() + p.complexSet.Real.Start
+	xend := float64(b.Width)*p.XStep() + xstart
+	ystart := float64(b.Y)*p.YStep() + p.complexSet.Imaginary.Start
+	yend := float64(b.Height)*p.YStep() + ystart
 	zoomSet := ComplexSet{
 		Real:      Range{xstart, xend},
 		Imaginary: Range{ystart, yend},
