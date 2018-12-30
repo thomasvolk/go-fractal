@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	model "./model"
+	utils "./utils"
 )
 
 type ComplexSet struct {
@@ -110,5 +111,15 @@ func (p Plane) Crop(b model.Box) Plane {
 		Imaginary: Range{ystart, yend},
 		Algorithm: p.complexSet.Algorithm,
 	}
-	return zoomSet.Plane(p.width, p.height, p.iterations)
+	return Plane{
+		complexSet: zoomSet,
+		width:      b.Width,
+		height:     b.Height,
+		iterations: p.iterations,
+		values:     utils.Crop(p.values, b),
+	}
+}
+
+func (p Plane) Scale(width int, height int) Plane {
+	return p.complexSet.Plane(width, height, p.iterations)
 }

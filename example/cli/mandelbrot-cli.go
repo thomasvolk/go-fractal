@@ -124,6 +124,7 @@ func main() {
 	zoomer := getZoomer(zoomConfig)
 	for z := 0; z < zoom; z++ {
 		p = zoomer.Zoom(p)
+		p = p.Scale(width, height)
 		writeFile(z+1, outputdir, &p)
 	}
 }

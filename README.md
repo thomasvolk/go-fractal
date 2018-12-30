@@ -6,11 +6,11 @@ Fractal library for go lang.
 
 build example app:
 
-    cd example
+    cd example/cli
     make
 
 generate png:
 
-    ./mandelbrot-cli -xstart 0.435396403 -xend 0.451687191 -ystart 0.367981352 -yend 0.380210061 -width 1200 -height 400 -iterations 100
+    ./mandelbrot-cli -x 0.435396403 -y 0.451687191 -xradius 0.15 -yradius 0.1 -width 600 -height 400 -iterations 100
 
 

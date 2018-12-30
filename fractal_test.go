@@ -34,12 +34,12 @@ func TestCrop(t *testing.T) {
 	p := c.Plane(300, 200, 10)
 	pc := p.Crop(model.Box{0, 0, 150, 100})
 
-	expected := 0.005
+	expected := 0.01
 	result := pc.XStep()
 	if expected != result {
 		t.Errorf("Xstep %v != %v", expected, result)
 	}
-	expected = 0.005
+	expected = 0.01
 	result = pc.YStep()
 	if expected != result {
 		t.Errorf("Ystep %v != %v", expected, result)
