@@ -118,7 +118,7 @@ func main() {
 		Algorithm: fractal.Mandelbrot,
 	}
 
-	p := fractal.NewPlane(m, width, height, iterations)
+	p := m.Plane(width, height, iterations)
 	writeFile(0, outputdir, &p)
 
 	zoomer := getZoomer(zoomConfig)

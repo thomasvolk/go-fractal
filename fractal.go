@@ -66,7 +66,7 @@ func NewRange(center float64, radius float64) Range {
 	return Range{center - radius, center + radius}
 }
 
-func NewPlane(complexSet ComplexSet, width int, heigth int, iterations int) Plane {
+func (complexSet ComplexSet) Plane(width int, heigth int, iterations int) Plane {
 	p := Plane{
 		complexSet: complexSet,
 		width:      width,
@@ -110,5 +110,5 @@ func (p Plane) Crop(b model.Box) Plane {
 		Imaginary: Range{ystart, yend},
 		Algorithm: p.complexSet.Algorithm,
 	}
-	return NewPlane(zoomSet, p.width, p.height, p.iterations)
+	return zoomSet.Plane(p.width, p.height, p.iterations)
 }

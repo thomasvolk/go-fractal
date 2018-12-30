@@ -12,7 +12,7 @@ func TestXStepYStep(t *testing.T) {
 		Imaginary: Range{-1.0, 1.0},
 		Algorithm: Mandelbrot,
 	}
-	p := NewPlane(c, 300, 200, 10)
+	p := c.Plane(300, 200, 10)
 	expected := 0.01
 	result := p.XStep()
 	if expected != result {
@@ -31,7 +31,7 @@ func TestCrop(t *testing.T) {
 		Imaginary: Range{-1.0, 1.0},
 		Algorithm: Mandelbrot,
 	}
-	p := NewPlane(c, 300, 200, 10)
+	p := c.Plane(300, 200, 10)
 	pc := p.Crop(model.Box{0, 0, 150, 100})
 
 	expected := 0.005

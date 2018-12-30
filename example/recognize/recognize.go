@@ -71,7 +71,7 @@ func mandelbrot(width int, height int, x float64, y float64, xradius float64, yr
 		Algorithm: fractal.Mandelbrot,
 	}
 
-	return fractal.NewPlane(m, width, height, iterations)
+	return m.Plane(width, height, iterations)
 }
 
 func main() {
