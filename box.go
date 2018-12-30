@@ -1,4 +1,4 @@
-package model
+package fractal
 
 import "fmt"
 

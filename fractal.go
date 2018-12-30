@@ -3,9 +3,6 @@ package fractal
 import (
 	"fmt"
 	"sync"
-
-	model "./model"
-	utils "./utils"
 )
 
 type ComplexSet struct {
@@ -101,7 +98,7 @@ func (p Plane) recursion(wg *sync.WaitGroup, col []int, y int, cx float64, cy fl
 	col[y] = count
 }
 
-func (p Plane) Crop(b model.Box) Plane {
+func (p Plane) Crop(b Box) Plane {
 	xstart := float64(b.X)*p.XStep() + p.complexSet.Real.Start
 	xend := float64(b.Width)*p.XStep() + xstart
 	ystart := float64(b.Y)*p.YStep() + p.complexSet.Imaginary.Start
@@ -116,7 +113,7 @@ func (p Plane) Crop(b model.Box) Plane {
 		width:      b.Width,
 		height:     b.Height,
 		iterations: p.iterations,
-		values:     utils.Crop(p.values, b),
+		values:     crop(p.values, b),
 	}
 }
 

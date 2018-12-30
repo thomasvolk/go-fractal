@@ -1,13 +1,15 @@
-package utils
+package fractal
 
 import (
 	"math"
-
-	model "../model"
 )
 
-func Deviation(plane [][]int) float64 {
-	m := Mean(plane)
+func (p Plane) Deviation() float64 {
+	return deviation(p.values)
+}
+
+func deviation(plane [][]int) float64 {
+	m := mean(plane)
 	sum := 0.0
 	count := 0.0
 	for _, col := range plane {
@@ -19,7 +21,7 @@ func Deviation(plane [][]int) float64 {
 	return math.Sqrt(sum / count)
 }
 
-func Mean(plane [][]int) float64 {
+func mean(plane [][]int) float64 {
 	count := 0
 	sum := 0
 	for _, col := range plane {
@@ -31,7 +33,7 @@ func Mean(plane [][]int) float64 {
 	return float64(sum) / float64(count)
 }
 
-func Crop(plane [][]int, box model.Box) [][]int {
+func crop(plane [][]int, box Box) [][]int {
 	part := make([][]int, box.Width)
 	for x, col := range plane {
 		px := x - box.X
