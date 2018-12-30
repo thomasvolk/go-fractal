@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"image/png"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -84,16 +83,6 @@ func writeFile(num int, outputdir string, plane *fractal.Plane) {
 	}
 	defer f.Close()
 	png.Encode(f, plane.Image())
-}
-
-func forQueryParam(r *http.Request, param string, f func(value float64)) {
-	values, ok := r.URL.Query()[param]
-	if ok {
-		fval, err := strconv.ParseFloat(values[0], 64)
-		if err == nil {
-			f(fval)
-		}
-	}
 }
 
 func main() {
