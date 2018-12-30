@@ -1,13 +1,25 @@
 package fractal
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 )
 
+var (
+	COLOR_SET_FACTORY = map[string]func(iterations float64) func(i float64) color.RGBA{
+		"default": defaultColorSetFactory,
+		"gray":    grayColorSetFactory,
+	}
+)
+
 func (p Plane) Image() *image.RGBA {
+	return p.ImageWithColorSet("default")
+}
+
+func (p Plane) ImageWithColorSet(colorSet string) *image.RGBA {
 	img := image.NewRGBA(image.Rect(0, 0, p.width, p.height))
-	colorCalculator := colorCalculator(float64(p.iterations))
+	colorCalculator := getColorSet(colorSet, float64(p.iterations))
 	for x, col := range p.values {
 		for y, val := range col {
 			color := colorCalculator(float64(val))
@@ -17,7 +29,27 @@ func (p Plane) Image() *image.RGBA {
 	return img
 }
 
-func colorCalculator(iterations float64) func(i float64) color.RGBA {
+func getColorSet(colorSet string, iterations float64) func(i float64) color.RGBA {
+	colorSetFactory := COLOR_SET_FACTORY[colorSet]
+	if colorSetFactory == nil {
+		panic(fmt.Sprintf("unknown color set: %s", colorSet))
+	}
+	return colorSetFactory(iterations)
+}
+
+func grayColorSetFactory(iterations float64) func(i float64) color.RGBA {
+	colorStep := 255.0 / iterations
+	return func(i float64) color.RGBA {
+		allColors := 255.0 - colorStep*i
+		return color.RGBA{
+			uint8(allColors),
+			uint8(allColors),
+			uint8(allColors),
+			0xff}
+	}
+}
+
+func defaultColorSetFactory(iterations float64) func(i float64) color.RGBA {
 	colorStep := 255.0 / iterations
 	iterationsHalf := iterations / 2.0
 	return func(i float64) color.RGBA {
