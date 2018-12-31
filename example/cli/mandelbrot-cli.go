@@ -75,14 +75,14 @@ func getZoomer(zoomConfig string) Zoomer {
 	panic(fmt.Sprintf("unknown zoom type: %s\n", zoomType))
 }
 
-func writeFile(num int, outputdir string, plane *fractal.Plane) {
+func writeFile(num int, outputdir string, plane *fractal.Plane, colorSet string) {
 	cs := plane.ComplexSet()
 	f, err := os.Create(fmt.Sprintf("%s/%03d_Real_%s_Imag_%s.png", outputdir, num, cs.Real, cs.Imaginary))
 	if err != nil {
 		panic(err)
 	}
 	defer f.Close()
-	png.Encode(f, plane.Image())
+	png.Encode(f, plane.ImageWithColorSet(colorSet))
 }
 
 func main() {
@@ -97,6 +97,7 @@ func main() {
 	var port int
 	var zoom int
 	var zoomConfig string
+	var colorSet string
 
 	flag.Float64Var(&x, "x", -0.6, "xstart")
 	flag.Float64Var(&xradius, "xradius", 1.6, "xradius")
@@ -108,7 +109,8 @@ func main() {
 	flag.StringVar(&outputdir, "outputdir", ".", "outputdir")
 	flag.IntVar(&port, "port", 8080, "http port")
 	flag.IntVar(&zoom, "zoom", 0, "zoom")
-	flag.StringVar(&zoomConfig, "zoom-config", "raster:2", "zoom type [raster:N] default is raster:2")
+	flag.StringVar(&zoomConfig, "zoom-config", "raster:2", "zoom type [ raster:N | circle:R:S ] default is 'raster:2'")
+	flag.StringVar(&colorSet, "color-set", "default", "colorset [ default | gray ] default is 'default'")
 
 	flag.Parse()
 
@@ -119,12 +121,12 @@ func main() {
 	}
 
 	p := m.Plane(width, height, iterations)
-	writeFile(0, outputdir, &p)
+	writeFile(0, outputdir, &p, colorSet)
 
 	zoomer := getZoomer(zoomConfig)
 	for z := 0; z < zoom; z++ {
 		p = zoomer.Zoom(p)
 		p = p.Scale(width, height)
-		writeFile(z+1, outputdir, &p)
+		writeFile(z+1, outputdir, &p, colorSet)
 	}
 }
