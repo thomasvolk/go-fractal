@@ -15,6 +15,10 @@ func (b Box) String() string {
 	return fmt.Sprintf("Box(x=%d, y=%d, w=%d, h=%d)", b.X, b.Y, b.Width, b.Height)
 }
 
+func (b Box) Center() (int, int) {
+	return b.X + b.Width/2, b.Y + b.Height/2
+}
+
 func (outer Box) InnerBox(x int, y int) Box {
 	left := (x - outer.X)
 	up := (y - outer.Y)

@@ -4,6 +4,24 @@ import (
 	"testing"
 )
 
+func TestCenter(t *testing.T) {
+	box := Box{0, 0, 100, 100}
+	x, y := box.Center()
+	if x != 50 || y != 50 {
+		t.Errorf("%s - center result failure x=%d, y=%d", box, x, y)
+	}
+	box = Box{0, 0, 2, 5}
+	x, y = box.Center()
+	if x != 1 || y != 2 {
+		t.Errorf("%s - center result failure x=%d, y=%d", box, x, y)
+	}
+	box = Box{0, 0, 1, 1}
+	x, y = box.Center()
+	if x != 0 || y != 0 {
+		t.Errorf("%s - center result failure x=%d, y=%d", box, x, y)
+	}
+}
+
 func TestInnerBox(t *testing.T) {
 	box := Box{0, 0, 100, 100}
 	ib := box.InnerBox(0, 0)
