@@ -36,6 +36,14 @@ func (p Plane) Deviation() float64 {
 	return deviation(p.values)
 }
 
+func (p Plane) Box() Box {
+	return Box{0, 0, p.width, p.height}
+}
+
+func (p Plane) Value(x, y int) int {
+	return p.values[x][y]
+}
+
 func deviation(plane [][]int) float64 {
 	m := mean(plane)
 	sum := 0.0

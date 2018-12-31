@@ -18,7 +18,7 @@ func (p Plane) CircleAutoZoom(x int, y int, radiusDivisor float64, angleStep flo
 }
 
 func (p Plane) CircleFrames(x int, y int, radiusDivisor float64, angleStep float64) []Plane {
-	box := Box{0, 0, p.width, p.height}.InnerBox(x, y)
+	box := p.Box().InnerBox(x, y)
 	rx := float64(box.Width) / radiusDivisor
 	ry := float64(box.Height) / radiusDivisor
 	var frames []Plane

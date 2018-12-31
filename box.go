@@ -1,6 +1,8 @@
 package fractal
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Box struct {
 	X      int
@@ -14,16 +16,13 @@ func (b Box) String() string {
 }
 
 func (outer Box) InnerBox(x int, y int) Box {
-	nx := (x - outer.X)
-	ny := (y - outer.Y)
-	xmin := (outer.Width - nx)
-	ymin := (outer.Height - ny)
-	if nx < xmin {
-		xmin = nx
-	}
-	if ny < ymin {
-		ymin = ny
-	}
+	left := (x - outer.X)
+	up := (y - outer.Y)
+	right := (outer.Width - left)
+	down := (outer.Height - up)
+
+	xmin := min(left, right)
+	ymin := min(up, down)
 
 	widthScaleFactor := float64(xmin*2) / float64(outer.Height)
 	heightScaleFactor := float64(ymin*2) / float64(outer.Height)
@@ -37,4 +36,11 @@ func (outer Box) InnerBox(x int, y int) Box {
 	newHeight := int(float64(outer.Height) * scaleFactor)
 
 	return Box{x - newWidth/2, y - newHeight/2, newWidth, newHeight}
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
