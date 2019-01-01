@@ -5,6 +5,30 @@ import (
 	"testing"
 )
 
+func TestValue(t *testing.T) {
+	iterations := 65
+	c := ComplexSet{
+		Real:      Range{-1.5, 1.5},
+		Imaginary: Range{-1.0, 1.0},
+		Algorithm: Mandelbrot,
+	}
+	p := c.Plane(300, 200, iterations)
+	cx, cy := p.Box().Center()
+	if cx != 150 || cy != 100 {
+		t.Errorf("wrong center: x=%d, y=%d", cx, cy)
+	}
+	v := p.Value(cx, cy)
+	expected := iterations
+	if v != expected {
+		t.Errorf("wrong value: %d != %d", expected, v)
+	}
+	v = p.Value(0, 0)
+	expected = 1
+	if v != expected {
+		t.Errorf("wrong value: %d != %d", expected, v)
+	}
+}
+
 func TestMean(t *testing.T) {
 	src := [][]int{[]int{1, 2, 3, 6}, []int{1, 2, 3, 6}, []int{1, 2, 0, 3}}
 	expected := 2.5

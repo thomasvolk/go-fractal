@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"image/color"
 	"image/png"
 	"os"
 	"strconv"
@@ -25,7 +26,13 @@ func writeFile(num int, outputdir string, plane *fractal.Plane) {
 		panic(err)
 	}
 	defer f.Close()
-	png.Encode(f, plane.ImageWithColorSet("gray"))
+	image := plane.ImageWithColorSet("gray")
+	cx, cy := plane.Box().Center()
+	shape := plane.Shape(cx, cy, 1.0)
+	for _, p := range shape {
+		image.Set(p.X, p.Y, color.RGBA{255, 0, 0, 255})
+	}
+	png.Encode(f, image)
 }
 
 func parse(value string) float64 {

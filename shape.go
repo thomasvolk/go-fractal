@@ -26,7 +26,8 @@ func maxPitch(axis []Value) Value {
 	lastPitch := 0
 	last := axis[0]
 	for _, current := range axis {
-		p := abs(current.Value - last.Value)
+		diff := current.Value - last.Value
+		p := abs(diff)
 		if p > lastPitch {
 			lastPitch = p
 			result = current
@@ -48,7 +49,7 @@ func (p Plane) axis(x int, y int, angle float64) []Value {
 	var axis []Value
 	px := x
 	py := y
-	for r := float64(1); px < box.Width && py < box.Height; r++ {
+	for r := float64(1); px < box.Width && py < box.Height && px >= 0 && py >= 0; r++ {
 		value := Value{px, py, p.Value(px, py)}
 		axis = append(axis, value)
 		px = x + int(r*math.Cos(angle))
