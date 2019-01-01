@@ -13,15 +13,14 @@ import (
 )
 
 var (
-	WIDTH      = 600
-	HEIGHT     = 600
-	ITERATIONS = 180
-	OUTPUTDIR  = "learnset"
+	WIDTH     = 600
+	HEIGHT    = 600
+	OUTPUTDIR = "learnset"
 )
 
-func writeFile(num int, outputdir string, plane *fractal.Plane) {
+func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane) {
 	cs := plane.ComplexSet()
-	f, err := os.Create(fmt.Sprintf("%s/%03d_Real_%s_Imag_%s.png", outputdir, num, cs.Real, cs.Imaginary))
+	f, err := os.Create(fmt.Sprintf("%s/%03d_Real_%s_Imag_%s_Rating_%f.png", outputdir, num, cs.Real, cs.Imaginary, rating))
 	if err != nil {
 		panic(err)
 	}
@@ -35,8 +34,16 @@ func writeFile(num int, outputdir string, plane *fractal.Plane) {
 	png.Encode(f, image)
 }
 
-func parse(value string) float64 {
+func parseFloat(value string) float64 {
 	v, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func parseInt(value string) int {
+	v, err := strconv.Atoi(value)
 	if err != nil {
 		panic(err)
 	}
@@ -55,14 +62,16 @@ func createLearnSet(sourceFile string) {
 	for scanner.Scan() {
 		line++
 		values := strings.Fields(scanner.Text())
-		if len(values) != 3 {
+		if len(values) != 5 {
 			panic(fmt.Sprintf("line %d: wrong file format", line))
 		}
-		x := parse(values[0])
-		y := parse(values[1])
-		r := parse(values[2])
-		p := mandelbrot(WIDTH, HEIGHT, x, y, r, r, ITERATIONS)
-		writeFile(line, OUTPUTDIR, &p)
+		x := parseFloat(values[0])
+		y := parseFloat(values[1])
+		r := parseFloat(values[2])
+		iterations := parseInt(values[3])
+		rating := parseFloat(values[4])
+		p := mandelbrot(WIDTH, HEIGHT, x, y, r, r, iterations)
+		writeFile(line, rating, OUTPUTDIR, &p)
 	}
 
 	if err := scanner.Err(); err != nil {
