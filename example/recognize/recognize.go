@@ -27,6 +27,7 @@ func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane) 
 	defer f.Close()
 	image := plane.ImageWithColorSet("gray")
 	cx, cy := plane.Box().Center()
+	image.Set(cx, cy, color.RGBA{0, 255, 255, 255})
 	shape := plane.Shape(cx, cy, 1.0)
 	for _, p := range shape {
 		image.Set(p.X, p.Y, color.RGBA{255, 0, 0, 255})
@@ -61,7 +62,11 @@ func createLearnSet(sourceFile string) {
 	line := 0
 	for scanner.Scan() {
 		line++
-		values := strings.Fields(scanner.Text())
+		lineText := scanner.Text()
+		if strings.HasPrefix(lineText, "#") {
+			continue
+		}
+		values := strings.Fields(lineText)
 		if len(values) != 5 {
 			panic(fmt.Sprintf("line %d: wrong file format", line))
 		}
