@@ -30,8 +30,15 @@ func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane) 
 	cx, cy := plane.Box().Center()
 	image.Set(cx, cy, color.RGBA{0, 255, 255, 255})
 	shape := plane.Shape(cx, cy, 1.0, 0.1)
+
+	nomrmalzedShape := make([]float64, 720, 720)
+	nomrmalzedShapeIndex := 0
 	for _, p := range shape {
 		image.Set(p.X, p.Y, color.RGBA{255, 0, 0, 255})
+		nomrmalzedShape[nomrmalzedShapeIndex] = float64(p.X) / float64(plane.Width())
+		nomrmalzedShapeIndex++
+		nomrmalzedShape[nomrmalzedShapeIndex] = float64(p.Y) / float64(plane.Height())
+		nomrmalzedShapeIndex++
 	}
 	png.Encode(f, image)
 }
