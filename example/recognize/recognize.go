@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"image/color"
 	"image/png"
+	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -20,7 +22,8 @@ var (
 
 func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane) {
 	cs := plane.ComplexSet()
-	f, err := os.Create(fmt.Sprintf("%s/%03d_Real_%s_Imag_%s_Rating_%f.png", outputdir, num, cs.Real, cs.Imaginary, rating))
+	baseFileName := fmt.Sprintf("%03d_Real_%s_Imag_%s_Rating_%f", num, cs.Real, cs.Imaginary, rating)
+	f, err := os.Create(fmt.Sprintf("%s/%s.png", outputdir, baseFileName))
 	if err != nil {
 		panic(err)
 	}
@@ -41,6 +44,16 @@ func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane) 
 		nomrmalzedShapeIndex++
 	}
 	png.Encode(f, image)
+
+	f, err = os.Create(fmt.Sprintf("%s/%s.shape.txt", outputdir, baseFileName))
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	f.Write([]byte(fmt.Sprintf("%v", rating)))
+	for _, value := range nomrmalzedShape {
+		f.Write([]byte(fmt.Sprintf(" %v", value)))
+	}
 }
 
 func parseFloat(value string) float64 {
@@ -105,4 +118,9 @@ func mandelbrot(width int, height int, x float64, y float64, xradius float64, yr
 
 func main() {
 	createLearnSet("learnset.txt")
+	files, err := filepath.Glob(fmt.Sprintf("%s/*.shape.txt", OUTPUTDIR))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(files)
 }
