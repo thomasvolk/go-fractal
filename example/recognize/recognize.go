@@ -25,10 +25,11 @@ func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane) 
 		panic(err)
 	}
 	defer f.Close()
+
 	image := plane.ImageWithColorSet("gray")
 	cx, cy := plane.Box().Center()
 	image.Set(cx, cy, color.RGBA{0, 255, 255, 255})
-	shape := plane.Shape(cx, cy, 1.0)
+	shape := plane.Shape(cx, cy, 1.0, 0.1)
 	for _, p := range shape {
 		image.Set(p.X, p.Y, color.RGBA{255, 0, 0, 255})
 	}

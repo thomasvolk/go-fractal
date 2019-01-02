@@ -11,30 +11,27 @@ type Value struct {
 	Value int
 }
 
-func (p Plane) Shape(x int, y int, angleStep float64) []image.Point {
+func (p Plane) Shape(x int, y int, angleStep float64, threshold float64) []image.Point {
 	var points []image.Point
 	for angle := 0.0; angle < 360.0; angle += angleStep {
 		axis := p.axis(x, y, angle)
-		pitch := maxPitch(axis)
+		pitch := maxPitch(axis, p.iterations, threshold)
 		points = append(points, image.Point{pitch.X, pitch.Y})
 	}
 	return points
 }
 
-func maxPitch(axis []Value) Value {
-	result := axis[0]
-	lastPitch := 0
+func maxPitch(axis []Value, maxValue int, threshold float64) Value {
 	last := axis[0]
 	for _, current := range axis {
-		diff := current.Value - last.Value
-		p := abs(diff)
-		if p > lastPitch {
-			lastPitch = p
-			result = current
+		diff := abs(current.Value - last.Value)
+		p := float64(diff) / float64(maxValue)
+		if p >= threshold {
+			return current
 		}
 		last = current
 	}
-	return result
+	return axis[0]
 }
 
 func abs(v int) int {
