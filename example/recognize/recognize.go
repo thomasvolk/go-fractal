@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"image"
 	"image/color"
 	"image/png"
 	"log"
@@ -28,23 +29,37 @@ func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane) 
 		panic(err)
 	}
 	defer f.Close()
+	shapeImg := image.NewRGBA(image.Rect(0, 0, 100, 100))
+	fImg, err := os.Create(fmt.Sprintf("%s/%s.shape.png", outputdir, baseFileName))
+	if err != nil {
+		panic(err)
+	}
+	defer fImg.Close()
 
-	image := plane.ImageWithColorSet("gray")
+	fractImage := plane.ImageWithColorSet("gray")
 	cx, cy := plane.Box().Center()
-	image.Set(cx, cy, color.RGBA{0, 255, 255, 255})
+	fractImage.Set(cx, cy, color.RGBA{0, 255, 255, 255})
 	shape := plane.Shape(cx, cy, 1.0, 0.1)
 
 	nomrmalzedShape := make([]float64, 720, 720)
 	nomrmalzedShapeIndex := 0
 	for _, p := range shape {
-		image.Set(p.X, p.Y, color.RGBA{255, 0, 0, 255})
-		nomrmalzedShape[nomrmalzedShapeIndex] = float64(p.X) / float64(plane.Width())
+		fractImage.Set(p.X, p.Y, color.RGBA{255, 0, 0, 255})
+		normX := float64(p.X) / float64(plane.Width())
+		nomrmalzedShape[nomrmalzedShapeIndex] = normX
 		nomrmalzedShapeIndex++
-		nomrmalzedShape[nomrmalzedShapeIndex] = float64(p.Y) / float64(plane.Height())
+		normY := float64(p.Y) / float64(plane.Height())
+		nomrmalzedShape[nomrmalzedShapeIndex] = normY
 		nomrmalzedShapeIndex++
+		shapeImg.Set(
+			int(normX*float64(shapeImg.Bounds().Dx())),
+			int(normY*float64(shapeImg.Bounds().Dy())),
+			color.RGBA{255, 0, 0, 255})
 	}
-	png.Encode(f, image)
+	png.Encode(f, fractImage)
+	png.Encode(fImg, shapeImg)
 
+	defer f.Close()
 	f, err = os.Create(fmt.Sprintf("%s/%s.shape.txt", outputdir, baseFileName))
 	if err != nil {
 		panic(err)
