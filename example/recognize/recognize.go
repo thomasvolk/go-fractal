@@ -6,19 +6,12 @@ import (
 	"image"
 	"image/color"
 	"image/png"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 
 	fractal "../.."
-)
-
-var (
-	WIDTH     = 600
-	HEIGHT    = 600
-	OUTPUTDIR = "learnset"
 )
 
 func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane) {
@@ -87,7 +80,7 @@ func parseInt(value string) int {
 	return v
 }
 
-func createLearnSet(sourceFile string) {
+func createLearnSet(sourceFile string) string {
 	file, err := os.Open(sourceFile)
 	if err != nil {
 		panic(err)
@@ -95,29 +88,37 @@ func createLearnSet(sourceFile string) {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	line := 0
+	scanner.Scan()
+	width := parseInt(scanner.Text())
+	scanner.Scan()
+	heigth := parseInt(scanner.Text())
+	scanner.Scan()
+	outputdir := scanner.Text()
+	scanner.Scan()
+	count := 0
 	for scanner.Scan() {
-		line++
+		count++
 		lineText := scanner.Text()
 		if strings.HasPrefix(lineText, "#") {
 			continue
 		}
 		values := strings.Fields(lineText)
 		if len(values) != 5 {
-			panic(fmt.Sprintf("line %d: wrong file format", line))
+			panic(fmt.Sprintf("line %d: wrong file format", count+4))
 		}
 		x := parseFloat(values[0])
 		y := parseFloat(values[1])
 		r := parseFloat(values[2])
 		iterations := parseInt(values[3])
 		rating := parseFloat(values[4])
-		p := mandelbrot(WIDTH, HEIGHT, x, y, r, r, iterations)
-		writeFile(line, rating, OUTPUTDIR, &p)
+		p := mandelbrot(width, heigth, x, y, r, r, iterations)
+		writeFile(count, rating, outputdir, &p)
 	}
 
 	if err := scanner.Err(); err != nil {
 		panic(err)
 	}
+	return outputdir
 }
 
 func mandelbrot(width int, height int, x float64, y float64, xradius float64, yradius float64,
@@ -132,10 +133,10 @@ func mandelbrot(width int, height int, x float64, y float64, xradius float64, yr
 }
 
 func main() {
-	createLearnSet("learnset.txt")
-	files, err := filepath.Glob(fmt.Sprintf("%s/*.shape.txt", OUTPUTDIR))
+	learnsetDir := createLearnSet("learnset.txt")
+	files, err := filepath.Glob(fmt.Sprintf("%s/*.shape.txt", learnsetDir))
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	fmt.Println(files)
 }
