@@ -19,20 +19,22 @@ var (
 	LEARNSET_CONFIG_HEADER = 6
 )
 
+func createFile(filename string) *os.File {
+	f, err := os.Create(filename)
+	if err != nil {
+		panic(err)
+	}
+	return f
+}
+
 func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane, angleStep float64, threshold float64) {
 	cs := plane.ComplexSet()
 	baseFileName := fmt.Sprintf("%03d_Real_%s_Imag_%s_Rating_%f", num, cs.Real, cs.Imaginary, rating)
-	f, err := os.Create(fmt.Sprintf("%s/%s.png", outputdir, baseFileName))
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
+	fractalFile := createFile(fmt.Sprintf("%s/%s.png", outputdir, baseFileName))
+	defer fractalFile.Close()
 	shapeImg := image.NewRGBA(image.Rect(0, 0, 100, 100))
-	fImg, err := os.Create(fmt.Sprintf("%s/%s.shape.png", outputdir, baseFileName))
-	if err != nil {
-		panic(err)
-	}
-	defer fImg.Close()
+	shapeFile := createFile(fmt.Sprintf("%s/%s.shape.png", outputdir, baseFileName))
+	defer shapeFile.Close()
 
 	fractImage := plane.ImageWithColorSet("gray")
 	cx, cy := plane.Box().Center()
@@ -60,18 +62,14 @@ func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane, 
 			int(normY*float64(shapeImg.Bounds().Dy())),
 			color.RGBA{255, 0, 0, 255})
 	}
-	png.Encode(f, fractImage)
-	png.Encode(fImg, shapeImg)
+	png.Encode(fractalFile, fractImage)
+	png.Encode(shapeFile, shapeImg)
 
-	defer f.Close()
-	f, err = os.Create(fmt.Sprintf("%s/%s.shape.txt", outputdir, baseFileName))
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	f.Write([]byte(fmt.Sprintf("%v", rating)))
+	shapeTextFile := createFile(fmt.Sprintf("%s/%s.shape.txt", outputdir, baseFileName))
+	defer shapeTextFile.Close()
+	shapeTextFile.Write([]byte(fmt.Sprintf("%v", rating)))
 	for _, value := range nomrmalzedShape {
-		f.Write([]byte(fmt.Sprintf(" %v", value)))
+		shapeTextFile.Write([]byte(fmt.Sprintf(" %v", value)))
 	}
 }
 
