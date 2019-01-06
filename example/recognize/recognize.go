@@ -41,36 +41,47 @@ func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane, 
 	fractImage.Set(cx, cy, color.RGBA{0, 255, 255, 255})
 
 	shape := plane.Shape(cx, cy, angleStep, threshold)
-	pointsF := MAX_ANGLE / angleStep
-	points := int(pointsF)
-	if pointsF > float64(points) {
-		points++
-	}
-
-	nomrmalzedShape := make([]float64, points*2, points*2)
-	nomrmalzedShapeIndex := 0
 	for _, p := range shape {
 		fractImage.Set(p.X, p.Y, color.RGBA{255, 0, 0, 255})
-		normX := float64(p.X) / float64(plane.Width())
-		nomrmalzedShape[nomrmalzedShapeIndex] = normX
-		nomrmalzedShapeIndex++
-		normY := float64(p.Y) / float64(plane.Height())
-		nomrmalzedShape[nomrmalzedShapeIndex] = normY
-		nomrmalzedShapeIndex++
-		shapeImg.Set(
-			int(normX*float64(shapeImg.Bounds().Dx())),
-			int(normY*float64(shapeImg.Bounds().Dy())),
-			color.RGBA{255, 0, 0, 255})
 	}
 	png.Encode(fractalFile, fractImage)
-	png.Encode(shapeFile, shapeImg)
 
+	normalizedShape := getNormalizedShape(shape, plane.Width(), plane.Height())
 	shapeTextFile := createFile(fmt.Sprintf("%s/%s.shape.txt", outputdir, baseFileName))
 	defer shapeTextFile.Close()
 	shapeTextFile.Write([]byte(fmt.Sprintf("%v", rating)))
-	for _, value := range nomrmalzedShape {
+	normX := 0.0
+	normY := 0.0
+	for i, value := range normalizedShape {
 		shapeTextFile.Write([]byte(fmt.Sprintf(" %v", value)))
+		if i%2 == 0 {
+			normX = value
+		}
+		if i > 0 && i%2 != 0 {
+			normY = value
+			shapeImg.Set(
+				int(normX*float64(shapeImg.Bounds().Dx())),
+				int(normY*float64(shapeImg.Bounds().Dy())),
+				color.RGBA{255, 0, 0, 255})
+		}
 	}
+	png.Encode(shapeFile, shapeImg)
+
+}
+
+func getNormalizedShape(shape []image.Point, orginalWidth int, orginalHeight int) []float64 {
+	points := len(shape)
+	normalizedShape := make([]float64, points*2, points*2)
+	index := 0
+	for _, p := range shape {
+		normX := float64(p.X) / float64(orginalWidth)
+		normalizedShape[index] = normX
+		index++
+		normY := float64(p.Y) / float64(orginalHeight)
+		normalizedShape[index] = normY
+		index++
+	}
+	return normalizedShape
 }
 
 func parseFloat(value string) float64 {
