@@ -1,7 +1,6 @@
 package fractal
 
 import (
-	"image"
 	"math"
 )
 
@@ -11,14 +10,36 @@ type Value struct {
 	Value int
 }
 
-func (p Plane) Shape(x int, y int, angleStep float64, threshold float64) []image.Point {
-	var points []image.Point
+type Shape struct {
+	points []Value
+	width  int
+	height int
+}
+
+func (p Plane) Shape(x int, y int, angleStep float64, threshold float64) Shape {
+	var points []Value
 	for angle := 0.0; angle < 360.0; angle += angleStep {
 		axis := p.axis(x, y, angle)
 		pitch := maxPitch(axis, p.iterations, threshold)
-		points = append(points, image.Point{pitch.X, pitch.Y})
+		points = append(points, pitch)
 	}
-	return points
+	return Shape{points: points, width: p.Width(), height: p.Height()}
+}
+
+func (s Shape) Normalize() [][]float64 {
+	points := len(s.points)
+	normalizedShape := make([][]float64, points, points)
+	for index, p := range s.points {
+		normX := float64(p.X) / float64(s.width)
+		normY := float64(p.Y) / float64(s.height)
+		normalizedShape[index] = []float64{normX, normY}
+		index++
+	}
+	return normalizedShape
+}
+
+func (s Shape) Points() []Value {
+	return s.points
 }
 
 func maxPitch(axis []Value, maxValue int, threshold float64) Value {

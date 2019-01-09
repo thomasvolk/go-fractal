@@ -41,47 +41,27 @@ func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane, 
 	fractImage.Set(cx, cy, color.RGBA{0, 255, 255, 255})
 
 	shape := plane.Shape(cx, cy, angleStep, threshold)
-	for _, p := range shape {
+	for _, p := range shape.Points() {
 		fractImage.Set(p.X, p.Y, color.RGBA{255, 0, 0, 255})
 	}
 	png.Encode(fractalFile, fractImage)
 
-	normalizedShape := getNormalizedShape(shape, plane.Width(), plane.Height())
+	normalizedShape := shape.Normalize()
 	shapeTextFile := createFile(fmt.Sprintf("%s/%s.shape.txt", outputdir, baseFileName))
 	defer shapeTextFile.Close()
 	shapeTextFile.Write([]byte(fmt.Sprintf("%v", rating)))
-	normX := 0.0
-	normY := 0.0
-	for i, value := range normalizedShape {
-		shapeTextFile.Write([]byte(fmt.Sprintf(" %v", value)))
-		if i%2 == 0 {
-			normX = value
-		}
-		if i > 0 && i%2 != 0 {
-			normY = value
-			shapeImg.Set(
-				int(normX*float64(shapeImg.Bounds().Dx())),
-				int(normY*float64(shapeImg.Bounds().Dy())),
-				color.RGBA{255, 0, 0, 255})
-		}
+	for _, value := range normalizedShape {
+		x := value[0]
+		y := value[1]
+		shapeTextFile.Write([]byte(fmt.Sprintf(" %v", x)))
+		shapeTextFile.Write([]byte(fmt.Sprintf(" %v", y)))
+		shapeImg.Set(
+			int(x*float64(shapeImg.Bounds().Dx())),
+			int(y*float64(shapeImg.Bounds().Dy())),
+			color.RGBA{255, 0, 0, 255})
 	}
 	png.Encode(shapeFile, shapeImg)
 
-}
-
-func getNormalizedShape(shape []image.Point, orginalWidth int, orginalHeight int) []float64 {
-	points := len(shape)
-	normalizedShape := make([]float64, points*2, points*2)
-	index := 0
-	for _, p := range shape {
-		normX := float64(p.X) / float64(orginalWidth)
-		normalizedShape[index] = normX
-		index++
-		normY := float64(p.Y) / float64(orginalHeight)
-		normalizedShape[index] = normY
-		index++
-	}
-	return normalizedShape
 }
 
 func parseFloat(value string) float64 {
