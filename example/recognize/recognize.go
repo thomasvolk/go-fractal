@@ -100,7 +100,7 @@ func createLearnSet(sourceFile string) string {
 	threshold := parseFloat(scanner.Text())
 	scanner.Scan()
 
-	count := 0
+	count := LEARNSET_CONFIG_HEADER
 	for scanner.Scan() {
 		count++
 		lineText := scanner.Text()
@@ -109,7 +109,7 @@ func createLearnSet(sourceFile string) string {
 		}
 		values := strings.Fields(lineText)
 		if len(values) != 5 {
-			panic(fmt.Sprintf("line %d: wrong file format", count+LEARNSET_CONFIG_HEADER))
+			panic(fmt.Sprintf("line %d: wrong file format", count))
 		}
 		x := parseFloat(values[0])
 		y := parseFloat(values[1])
