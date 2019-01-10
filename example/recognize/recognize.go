@@ -12,6 +12,8 @@ import (
 	"strings"
 
 	fractal "../.."
+
+	"github.com/Xamber/Varis"
 )
 
 var (
@@ -27,7 +29,16 @@ func createFile(filename string) *os.File {
 	return f
 }
 
-func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane, angleStep float64, threshold float64) {
+func openFile(filename string) *os.File {
+	f, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+	return f
+}
+
+func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane,
+	angleStep float64, threshold float64) {
 	cs := plane.ComplexSet()
 	baseFileName := fmt.Sprintf("%03d_Real_%s_Imag_%s_Rating_%f", num, cs.Real, cs.Imaginary, rating)
 	fractalFile := createFile(fmt.Sprintf("%s/%s.png", outputdir, baseFileName))
@@ -49,7 +60,7 @@ func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane, 
 	normalizedShape := shape.Normalize()
 	shapeTextFile := createFile(fmt.Sprintf("%s/%s.shape.txt", outputdir, baseFileName))
 	defer shapeTextFile.Close()
-	shapeTextFile.Write([]byte(fmt.Sprintf("%v", rating)))
+	shapeTextFile.Write([]byte(fmt.Sprintf("%v\n", rating)))
 	for _, value := range normalizedShape {
 		x := value[0]
 		y := value[1]
@@ -81,10 +92,7 @@ func parseInt(value string) int {
 }
 
 func createLearnSet(sourceFile string) string {
-	file, err := os.Open(sourceFile)
-	if err != nil {
-		panic(err)
-	}
+	file := openFile(sourceFile)
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
@@ -137,11 +145,40 @@ func mandelbrot(width int, height int, x float64, y float64, xradius float64, yr
 	return m.Plane(width, height, iterations)
 }
 
-func main() {
-	learnsetDir := createLearnSet("learnset.txt")
+func learn(learnsetDir string) {
 	files, err := filepath.Glob(fmt.Sprintf("%s/*.shape.txt", learnsetDir))
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(files)
+	learnSet := varis.Dataset{}
+	shapeSize := 0
+	for _, sourceFile := range files {
+		file := openFile(sourceFile)
+		defer file.Close()
+		scanner := bufio.NewScanner(file)
+		scanner.Scan()
+		rating := parseFloat(scanner.Text())
+		scanner.Scan()
+		valuesLine := scanner.Text()
+		textValues := strings.Fields(valuesLine)
+		shapeValues := make(varis.Vector, len(textValues))
+		for _, v := range textValues {
+			shapeValues = append(shapeValues, parseFloat(v))
+		}
+		shapeSize = len(shapeValues)
+		item := [2]varis.Vector{shapeValues, varis.Vector{rating}}
+		learnSet = append(learnSet, item)
+	}
+	net := varis.CreatePerceptron(shapeSize, shapeSize*2, 1)
+	trainer := varis.PerceptronTrainer{
+		Network: &net,
+		Dataset: learnSet,
+	}
+	trainer.BackPropagation(1)
+	varis.PrintCalculation = true
+}
+
+func main() {
+	learnsetDir := createLearnSet("learnset.txt")
+	learn(learnsetDir)
 }
