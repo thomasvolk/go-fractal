@@ -169,12 +169,12 @@ func learn(learnsetDir string) {
 		item := [2]varis.Vector{shapeValues, varis.Vector{rating}}
 		learnSet = append(learnSet, item)
 	}
-	net := varis.CreatePerceptron(shapeSize, shapeSize*2, 1)
+	net := varis.CreatePerceptron(shapeSize, 4, 1)
 	trainer := varis.PerceptronTrainer{
 		Network: &net,
 		Dataset: learnSet,
 	}
-	trainer.BackPropagation(1)
+	trainer.BackPropagation(10)
 	varis.PrintCalculation = true
 }
 
