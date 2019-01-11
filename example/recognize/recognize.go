@@ -145,6 +145,22 @@ func mandelbrot(width int, height int, x float64, y float64, xradius float64, yr
 	return m.Plane(width, height, iterations)
 }
 
+func readShape(sourceFile string) (varis.Vector, float64) {
+	file := openFile(sourceFile)
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+	rating := parseFloat(scanner.Text())
+	scanner.Scan()
+	valuesLine := scanner.Text()
+	textValues := strings.Fields(valuesLine)
+	shapeValues := make(varis.Vector, len(textValues))
+	for _, v := range textValues {
+		shapeValues = append(shapeValues, parseFloat(v))
+	}
+	return shapeValues, rating
+}
+
 func learn(learnsetDir string) {
 	files, err := filepath.Glob(fmt.Sprintf("%s/*.shape.txt", learnsetDir))
 	if err != nil {
@@ -153,29 +169,21 @@ func learn(learnsetDir string) {
 	learnSet := varis.Dataset{}
 	shapeSize := 0
 	for _, sourceFile := range files {
-		file := openFile(sourceFile)
-		defer file.Close()
-		scanner := bufio.NewScanner(file)
-		scanner.Scan()
-		rating := parseFloat(scanner.Text())
-		scanner.Scan()
-		valuesLine := scanner.Text()
-		textValues := strings.Fields(valuesLine)
-		shapeValues := make(varis.Vector, len(textValues))
-		for _, v := range textValues {
-			shapeValues = append(shapeValues, parseFloat(v))
-		}
+		shapeValues, rating := readShape(sourceFile)
 		shapeSize = len(shapeValues)
-		item := [2]varis.Vector{shapeValues, varis.Vector{rating}}
-		learnSet = append(learnSet, item)
+		learnSet = append(learnSet, [2]varis.Vector{shapeValues, varis.Vector{rating}})
 	}
 	net := varis.CreatePerceptron(shapeSize, 4, 1)
 	trainer := varis.PerceptronTrainer{
 		Network: &net,
 		Dataset: learnSet,
 	}
-	trainer.BackPropagation(10)
+	trainer.BackPropagation(100)
 	varis.PrintCalculation = true
+
+	shapeValues, _ := readShape(files[0])
+	result := net.Calculate(shapeValues)
+	fmt.Printf("result: %f\n", result[0])
 }
 
 func main() {
