@@ -91,7 +91,16 @@ func parseInt(value string) int {
 	return v
 }
 
-func createLearnSet(sourceFile string) (string, int) {
+func parseIntArray(valuesLine string) []int {
+	textValues := strings.Fields(valuesLine)
+	values := make([]int, len(textValues))
+	for i, v := range textValues {
+		values[i] = parseInt(v)
+	}
+	return values
+}
+
+func createLearnSet(sourceFile string) (string, []int) {
 	file := openFile(sourceFile)
 	defer file.Close()
 
@@ -107,7 +116,7 @@ func createLearnSet(sourceFile string) (string, int) {
 	scanner.Scan()
 	angleStep := parseFloat(scanner.Text())
 	scanner.Scan()
-	middleLayer := parseInt(scanner.Text())
+	middleLayer := parseIntArray(scanner.Text())
 	scanner.Scan()
 
 	count := LEARNSET_CONFIG_HEADER
@@ -178,9 +187,12 @@ func getLearnSet(dir string) (varis.Dataset, int) {
 	return learnSet, shapeSize
 }
 
-func learn(learnsetDir string, iterations int, middleLayer int) varis.Perceptron {
+func learn(learnsetDir string, iterations int, middleLayer []int) varis.Perceptron {
 	learnSet, shapeSize := getLearnSet(learnsetDir)
-	net := varis.CreatePerceptron(shapeSize, middleLayer, 1)
+	config := []int{shapeSize}
+	config = append(config, middleLayer...)
+	config = append(config, 1)
+	net := varis.CreatePerceptron(config...)
 	trainer := varis.PerceptronTrainer{
 		Network: &net,
 		Dataset: learnSet,
@@ -197,7 +209,6 @@ func main() {
 	net := learn(learnsetDir, 10000, middleLayer)
 
 	fmt.Println("test:")
-	//varis.PrintCalculation = true
 	learnSet, _ := getLearnSet(learnsetDir)
 	for _, entry := range learnSet {
 		shapeValues := entry[0]
