@@ -72,7 +72,6 @@ func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane,
 			color.RGBA{255, 0, 0, 255})
 	}
 	png.Encode(shapeFile, shapeImg)
-
 }
 
 func parseFloat(value string) float64 {
@@ -100,7 +99,7 @@ func parseIntArray(valuesLine string) []int {
 	return values
 }
 
-func createLearnSet(sourceFile string) (string, []int) {
+func createLearnSet(sourceFile string) (string, []int, int) {
 	file := openFile(sourceFile)
 	defer file.Close()
 
@@ -117,6 +116,8 @@ func createLearnSet(sourceFile string) (string, []int) {
 	angleStep := parseFloat(scanner.Text())
 	scanner.Scan()
 	middleLayer := parseIntArray(scanner.Text())
+	scanner.Scan()
+	learnIterations := parseInt(scanner.Text())
 	scanner.Scan()
 
 	count := LEARNSET_CONFIG_HEADER
@@ -142,7 +143,7 @@ func createLearnSet(sourceFile string) (string, []int) {
 	if err := scanner.Err(); err != nil {
 		panic(err)
 	}
-	return outputdir, middleLayer
+	return outputdir, middleLayer, learnIterations
 }
 
 func mandelbrot(width int, height int, x float64, y float64, xradius float64, yradius float64,
@@ -203,10 +204,10 @@ func learn(learnsetDir string, iterations int, middleLayer []int) varis.Perceptr
 
 func main() {
 	fmt.Println("create learn set ...")
-	learnsetDir, middleLayer := createLearnSet("learnset.txt")
+	learnsetDir, middleLayer, learnIterations := createLearnSet("learnset.txt")
 
 	fmt.Println("learn ...")
-	net := learn(learnsetDir, 10000, middleLayer)
+	net := learn(learnsetDir, learnIterations, middleLayer)
 
 	fmt.Println("test:")
 	learnSet, _ := getLearnSet(learnsetDir)
