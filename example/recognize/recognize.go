@@ -91,7 +91,7 @@ func parseInt(value string) int {
 	return v
 }
 
-func createLearnSet(sourceFile string) string {
+func createLearnSet(sourceFile string) (string, int) {
 	file := openFile(sourceFile)
 	defer file.Close()
 
@@ -103,9 +103,11 @@ func createLearnSet(sourceFile string) string {
 	scanner.Scan()
 	outputdir := scanner.Text()
 	scanner.Scan()
+	threshold := parseFloat(scanner.Text())
+	scanner.Scan()
 	angleStep := parseFloat(scanner.Text())
 	scanner.Scan()
-	threshold := parseFloat(scanner.Text())
+	middleLayer := parseInt(scanner.Text())
 	scanner.Scan()
 
 	count := LEARNSET_CONFIG_HEADER
@@ -131,7 +133,7 @@ func createLearnSet(sourceFile string) string {
 	if err := scanner.Err(); err != nil {
 		panic(err)
 	}
-	return outputdir
+	return outputdir, middleLayer
 }
 
 func mandelbrot(width int, height int, x float64, y float64, xradius float64, yradius float64,
@@ -189,10 +191,10 @@ func learn(learnsetDir string, iterations int, middleLayer int) varis.Perceptron
 
 func main() {
 	fmt.Println("create learn set ...")
-	learnsetDir := createLearnSet("learnset.txt")
+	learnsetDir, middleLayer := createLearnSet("learnset.txt")
 
 	fmt.Println("learn ...")
-	net := learn(learnsetDir, 1000, 11)
+	net := learn(learnsetDir, 10000, middleLayer)
 
 	fmt.Println("test:")
 	//varis.PrintCalculation = true
