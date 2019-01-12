@@ -176,9 +176,9 @@ func getLearnSet(dir string) (varis.Dataset, int) {
 	return learnSet, shapeSize
 }
 
-func learn(learnsetDir string, iterations int) varis.Perceptron {
+func learn(learnsetDir string, iterations int, middleLayer int) varis.Perceptron {
 	learnSet, shapeSize := getLearnSet(learnsetDir)
-	net := varis.CreatePerceptron(shapeSize, 4, 1)
+	net := varis.CreatePerceptron(shapeSize, middleLayer, 1)
 	trainer := varis.PerceptronTrainer{
 		Network: &net,
 		Dataset: learnSet,
@@ -188,9 +188,13 @@ func learn(learnsetDir string, iterations int) varis.Perceptron {
 }
 
 func main() {
+	fmt.Println("create learn set ...")
 	learnsetDir := createLearnSet("learnset.txt")
-	net := learn(learnsetDir, 1000)
 
+	fmt.Println("learn ...")
+	net := learn(learnsetDir, 1000, 11)
+
+	fmt.Println("test:")
 	//varis.PrintCalculation = true
 	learnSet, _ := getLearnSet(learnsetDir)
 	for _, entry := range learnSet {
