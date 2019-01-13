@@ -37,9 +37,10 @@ func openFile(filename string) *os.File {
 	return f
 }
 
-func writeFile(num int, rating float64, outputdir string, plane *fractal.Plane,
+func writeFile(num int, cs *fractal.ComplexSet, width, height, iterations int,
+	rating float64, outputdir string,
 	angleStep float64, threshold float64) {
-	cs := plane.ComplexSet()
+	plane := cs.Plane(width, height, iterations)
 	baseFileName := fmt.Sprintf("%03d_Real_%s_Imag_%s_Rating_%f", num, cs.Real, cs.Imaginary, rating)
 	fractalFile := createFile(fmt.Sprintf("%s/%s.png", outputdir, baseFileName))
 	defer fractalFile.Close()
@@ -123,24 +124,18 @@ func createLearnSet(sourceFile, outputdir string, threshold float64,
 		r := parseFloat(values[2])
 		iterations := parseInt(values[3])
 		rating := parseFloat(values[4])
-		p := mandelbrot(width, height, x, y, r, r, iterations)
-		writeFile(count, rating, outputdir, &p, angleStep, threshold)
+		m := fractal.ComplexSet{
+			Real:      fractal.NewRange(x, r),
+			Imaginary: fractal.NewRange(y, r),
+			Algorithm: fractal.Mandelbrot,
+		}
+		writeFile(count, &m, width, height, iterations,
+			rating, outputdir, angleStep, threshold)
 	}
 
 	if err := scanner.Err(); err != nil {
 		panic(err)
 	}
-}
-
-func mandelbrot(width int, height int, x float64, y float64, xradius float64, yradius float64,
-	iterations int) fractal.Plane {
-	m := fractal.ComplexSet{
-		Real:      fractal.NewRange(x, xradius),
-		Imaginary: fractal.NewRange(y, yradius),
-		Algorithm: fractal.Mandelbrot,
-	}
-
-	return m.Plane(width, height, iterations)
 }
 
 func readShape(sourceFile string) (varis.Vector, float64) {
