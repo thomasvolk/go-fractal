@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"image"
 	"image/color"
@@ -17,8 +18,7 @@ import (
 )
 
 var (
-	MAX_ANGLE              = 360.0
-	LEARNSET_CONFIG_HEADER = 6
+	MAX_ANGLE = 360.0
 )
 
 func createFile(filename string) *os.File {
@@ -99,28 +99,15 @@ func parseIntArray(valuesLine string) []int {
 	return values
 }
 
-func createLearnSet(sourceFile string) (string, []int, int) {
+func createLearnSet(sourceFile, outputdir string, threshold float64,
+	shapeSize, width, height int) {
 	file := openFile(sourceFile)
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-	scanner.Scan()
-	width := parseInt(scanner.Text())
-	scanner.Scan()
-	heigth := parseInt(scanner.Text())
-	scanner.Scan()
-	outputdir := scanner.Text()
-	scanner.Scan()
-	threshold := parseFloat(scanner.Text())
-	scanner.Scan()
-	angleStep := parseFloat(scanner.Text())
-	scanner.Scan()
-	middleLayer := parseIntArray(scanner.Text())
-	scanner.Scan()
-	learnIterations := parseInt(scanner.Text())
-	scanner.Scan()
+	angleStep := MAX_ANGLE / float64(shapeSize)
 
-	count := LEARNSET_CONFIG_HEADER
+	scanner := bufio.NewScanner(file)
+	count := 0
 	for scanner.Scan() {
 		count++
 		lineText := scanner.Text()
@@ -136,14 +123,13 @@ func createLearnSet(sourceFile string) (string, []int, int) {
 		r := parseFloat(values[2])
 		iterations := parseInt(values[3])
 		rating := parseFloat(values[4])
-		p := mandelbrot(width, heigth, x, y, r, r, iterations)
+		p := mandelbrot(width, height, x, y, r, r, iterations)
 		writeFile(count, rating, outputdir, &p, angleStep, threshold)
 	}
 
 	if err := scanner.Err(); err != nil {
 		panic(err)
 	}
-	return outputdir, middleLayer, learnIterations
 }
 
 func mandelbrot(width int, height int, x float64, y float64, xradius float64, yradius float64,
@@ -203,14 +189,32 @@ func learn(learnsetDir string, iterations int, middleLayer []int) varis.Perceptr
 }
 
 func main() {
+	var width, height int
+	var learnSetDir, learnSetFile string
+	var shapeThreshold float64
+	var shapeSize int
+	var learnIterations int
+	var middleLayer string
+
+	flag.StringVar(&learnSetDir, "learnset", "learnset", "learn set result dir")
+	flag.StringVar(&learnSetFile, "learnset-source", "learnset.txt", "learn set source file")
+	flag.IntVar(&width, "width", 600, "width")
+	flag.IntVar(&height, "height", 600, "height")
+	flag.IntVar(&shapeSize, "shape-size", 100, "count of shape points")
+	flag.Float64Var(&shapeThreshold, "shape-threshold", 0.03, "threshold for detectiong the shape")
+	flag.IntVar(&learnIterations, "learn", 100, "count of learn steps")
+	flag.StringVar(&middleLayer, "middle-layer", "11", "layout of the neuron middle layer")
+
+	flag.Parse()
+
 	fmt.Println("create learn set ...")
-	learnsetDir, middleLayer, learnIterations := createLearnSet("learnset.txt")
+	createLearnSet(learnSetFile, learnSetDir, shapeThreshold, shapeSize, width, height)
 
 	fmt.Println("learn ...")
-	net := learn(learnsetDir, learnIterations, middleLayer)
+	net := learn(learnSetDir, learnIterations, parseIntArray(middleLayer))
 
 	fmt.Println("test:")
-	learnSet, _ := getLearnSet(learnsetDir)
+	learnSet, _ := getLearnSet(learnSetDir)
 	for _, entry := range learnSet {
 		shapeValues := entry[0]
 		expectedRating := entry[1][0]
