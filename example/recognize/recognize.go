@@ -148,8 +148,8 @@ func readShape(sourceFile string) (varis.Vector, float64) {
 	valuesLine := scanner.Text()
 	textValues := strings.Fields(valuesLine)
 	shapeValues := make(varis.Vector, len(textValues))
-	for _, v := range textValues {
-		shapeValues = append(shapeValues, parseFloat(v))
+	for i, v := range textValues {
+		shapeValues[i] = parseFloat(v)
 	}
 	return shapeValues, rating
 }
@@ -196,18 +196,18 @@ func main() {
 	flag.IntVar(&height, "height", 600, "height")
 	flag.IntVar(&shapeSize, "shape-size", 100, "count of shape points")
 	flag.Float64Var(&shapeThreshold, "shape-threshold", 0.03, "threshold for detectiong the shape")
-	flag.IntVar(&learnIterations, "learn", 100, "count of learn steps")
-	flag.StringVar(&middleLayer, "middle-layer", "11", "layout of the neuron middle layer")
+	flag.IntVar(&learnIterations, "learn", 1000, "count of learn steps")
+	flag.StringVar(&middleLayer, "middle-layer", "201", "layout of the neuron middle layer")
 
 	flag.Parse()
 
-	fmt.Println("create learn set ...")
+	fmt.Println("# create learn set ...")
 	createLearnSet(learnSetFile, learnSetDir, shapeThreshold, shapeSize, width, height)
 
-	fmt.Println("learn ...")
-	net := learn(learnSetDir, shapeSize*4, learnIterations, parseIntArray(middleLayer))
+	fmt.Println("# learn ...")
+	net := learn(learnSetDir, shapeSize*2, learnIterations, parseIntArray(middleLayer))
 
-	fmt.Println("test:")
+	fmt.Println("# test:")
 	learnSet := getLearnSet(learnSetDir)
 	for _, entry := range learnSet {
 		shapeValues := entry[0]
