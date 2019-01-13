@@ -18,10 +18,6 @@ import (
 	_ "github.com/Xamber/Varis"
 )
 
-var (
-	MAX_ANGLE = 360.0
-)
-
 func createFile(filename string) *os.File {
 	f, err := os.Create(filename)
 	if err != nil {
@@ -40,7 +36,7 @@ func openFile(filename string) *os.File {
 
 func writeFile(num int, cs *fractal.ComplexSet, width, height, iterations int,
 	rating float64, outputdir string,
-	angleStep float64, threshold float64) {
+	shapeSize int, threshold float64) {
 	plane := cs.Plane(width, height, iterations)
 	baseFileName := fmt.Sprintf("%03d_Real_%s_Imag_%s_Rating_%f", num, cs.Real, cs.Imaginary, rating)
 	fractalFile := createFile(fmt.Sprintf("%s/%s.png", outputdir, baseFileName))
@@ -53,7 +49,7 @@ func writeFile(num int, cs *fractal.ComplexSet, width, height, iterations int,
 	cx, cy := plane.Box().Center()
 	fractImage.Set(cx, cy, color.RGBA{0, 255, 255, 255})
 
-	shape := plane.Shape(cx, cy, angleStep, threshold)
+	shape := plane.Shape(cx, cy, shapeSize, threshold)
 	for _, p := range shape.Points() {
 		fractImage.Set(p.X, p.Y, color.RGBA{255, 0, 0, 255})
 	}
@@ -106,8 +102,6 @@ func createLearnSet(sourceFile, outputdir string, threshold float64,
 	file := openFile(sourceFile)
 	defer file.Close()
 
-	angleStep := MAX_ANGLE / float64(shapeSize)
-
 	scanner := bufio.NewScanner(file)
 	count := 0
 	for scanner.Scan() {
@@ -131,7 +125,7 @@ func createLearnSet(sourceFile, outputdir string, threshold float64,
 			Algorithm: fractal.Mandelbrot,
 		}
 		writeFile(count, &m, width, height, iterations,
-			rating, outputdir, angleStep, threshold)
+			rating, outputdir, shapeSize, threshold)
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -163,6 +157,7 @@ func getLearnSet(dir string) varis.Dataset {
 	learnSet := varis.Dataset{}
 	for _, sourceFile := range files {
 		shapeValues, rating := readShape(sourceFile)
+		fmt.Printf("load shape %s - len: %d\n", sourceFile, len(shapeValues))
 		learnSet = append(learnSet, [2]varis.Vector{shapeValues, varis.Vector{rating}})
 	}
 	return learnSet

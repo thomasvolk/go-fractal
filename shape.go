@@ -4,6 +4,10 @@ import (
 	"math"
 )
 
+var (
+	MAX_ANGLE = 360.0
+)
+
 type Value struct {
 	X     int
 	Y     int
@@ -16,12 +20,17 @@ type Shape struct {
 	height int
 }
 
-func (p Plane) Shape(x int, y int, angleStep float64, threshold float64) Shape {
+func (p Plane) Shape(x int, y int, shapeSize int, threshold float64) Shape {
+	angleStep := MAX_ANGLE / float64(shapeSize)
 	var points []Value
-	for angle := 0.0; angle < 360.0; angle += angleStep {
+	count := 0
+	for angle := 0.0; angle < MAX_ANGLE; angle += angleStep {
 		axis := p.axis(x, y, angle)
 		pitch := maxPitch(axis, p.iterations, threshold)
-		points = append(points, pitch)
+		if count < shapeSize {
+			points = append(points, pitch)
+		}
+		count++
 	}
 	return Shape{points: points, width: p.Width(), height: p.Height()}
 }
