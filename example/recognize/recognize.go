@@ -154,26 +154,25 @@ func readShape(sourceFile string) (varis.Vector, float64) {
 	return shapeValues, rating
 }
 
-func getLearnSet(dir string) (varis.Dataset, int) {
+func getLearnSet(dir string) varis.Dataset {
 	files, err := filepath.Glob(fmt.Sprintf("%s/*.shape.txt", dir))
 	if err != nil {
 		panic(err)
 	}
 	learnSet := varis.Dataset{}
-	shapeSize := 0
 	for _, sourceFile := range files {
 		shapeValues, rating := readShape(sourceFile)
-		shapeSize = len(shapeValues)
 		learnSet = append(learnSet, [2]varis.Vector{shapeValues, varis.Vector{rating}})
 	}
-	return learnSet, shapeSize
+	return learnSet
 }
 
-func learn(learnsetDir string, iterations int, middleLayer []int) varis.Perceptron {
-	learnSet, shapeSize := getLearnSet(learnsetDir)
-	config := []int{shapeSize}
+func learn(learnsetDir string, inputLayer, iterations int, middleLayer []int) varis.Perceptron {
+	learnSet := getLearnSet(learnsetDir)
+	config := []int{inputLayer}
 	config = append(config, middleLayer...)
 	config = append(config, 1)
+	fmt.Printf("create net %v\n", config)
 	net := varis.CreatePerceptron(config...)
 	trainer := varis.PerceptronTrainer{
 		Network: &net,
@@ -206,10 +205,10 @@ func main() {
 	createLearnSet(learnSetFile, learnSetDir, shapeThreshold, shapeSize, width, height)
 
 	fmt.Println("learn ...")
-	net := learn(learnSetDir, learnIterations, parseIntArray(middleLayer))
+	net := learn(learnSetDir, shapeSize*4, learnIterations, parseIntArray(middleLayer))
 
 	fmt.Println("test:")
-	learnSet, _ := getLearnSet(learnSetDir)
+	learnSet := getLearnSet(learnSetDir)
 	for _, entry := range learnSet {
 		shapeValues := entry[0]
 		expectedRating := entry[1][0]
