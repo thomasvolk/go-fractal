@@ -15,6 +15,7 @@ import (
 	fractal "../.."
 
 	"github.com/Xamber/Varis"
+	_ "github.com/Xamber/Varis"
 )
 
 var (
@@ -189,15 +190,17 @@ func main() {
 	var shapeSize int
 	var learnIterations int
 	var middleLayer string
+	var netFile string
 
 	flag.StringVar(&learnSetDir, "learnset", "learnset", "learn set result dir")
 	flag.StringVar(&learnSetFile, "learnset-source", "learnset.txt", "learn set source file")
 	flag.IntVar(&width, "width", 600, "width")
 	flag.IntVar(&height, "height", 600, "height")
-	flag.IntVar(&shapeSize, "shape-size", 7, "count of shape points")
+	flag.IntVar(&shapeSize, "shape-size", 9, "count of shape points")
 	flag.Float64Var(&shapeThreshold, "shape-threshold", 0.03, "threshold for detectiong the shape")
-	flag.IntVar(&learnIterations, "learn", 2000, "count of learn steps")
-	flag.StringVar(&middleLayer, "middle-layer", "15", "layout of the neuron middle layer")
+	flag.IntVar(&learnIterations, "learn", 6000, "count of learn steps")
+	flag.StringVar(&middleLayer, "middle-layer", "19", "layout of the neuron middle layer")
+	flag.StringVar(&netFile, "net", "net.json", "net output file")
 
 	flag.Parse()
 
@@ -206,6 +209,11 @@ func main() {
 
 	fmt.Println("# learn ...")
 	net := learn(learnSetDir, shapeSize*2, learnIterations, parseIntArray(middleLayer))
+
+	netJson := varis.ToJSON(net)
+	file := createFile(netFile)
+	defer file.Close()
+	file.Write([]byte(netJson))
 
 	fmt.Println("# test:")
 	learnSet := getLearnSet(learnSetDir)
