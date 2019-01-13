@@ -12,5 +12,5 @@ clean:
 
 test-run: build
 	mkdir -p learnset
-	./recognize
+	time ./recognize
 

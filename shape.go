@@ -33,7 +33,6 @@ func (s Shape) Normalize() [][]float64 {
 		normX := float64(p.X) / float64(s.width)
 		normY := float64(p.Y) / float64(s.height)
 		normalizedShape[index] = []float64{normX, normY}
-		index++
 	}
 	return normalizedShape
 }
