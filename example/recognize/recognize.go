@@ -194,10 +194,10 @@ func main() {
 	flag.StringVar(&learnSetFile, "learnset-source", "learnset.txt", "learn set source file")
 	flag.IntVar(&width, "width", 600, "width")
 	flag.IntVar(&height, "height", 600, "height")
-	flag.IntVar(&shapeSize, "shape-size", 100, "count of shape points")
+	flag.IntVar(&shapeSize, "shape-size", 5, "count of shape points")
 	flag.Float64Var(&shapeThreshold, "shape-threshold", 0.03, "threshold for detectiong the shape")
-	flag.IntVar(&learnIterations, "learn", 1000, "count of learn steps")
-	flag.StringVar(&middleLayer, "middle-layer", "201", "layout of the neuron middle layer")
+	flag.IntVar(&learnIterations, "learn", 10000, "count of learn steps")
+	flag.StringVar(&middleLayer, "middle-layer", "11", "layout of the neuron middle layer")
 
 	flag.Parse()
 
