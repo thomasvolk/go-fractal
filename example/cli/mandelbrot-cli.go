@@ -94,7 +94,6 @@ func main() {
 	var width int
 	var height int
 	var outputdir string
-	var port int
 	var zoom int
 	var zoomConfig string
 	var colorSet string
@@ -107,7 +106,6 @@ func main() {
 	flag.IntVar(&width, "width", 400, "width")
 	flag.IntVar(&height, "height", 300, "height")
 	flag.StringVar(&outputdir, "outputdir", ".", "outputdir")
-	flag.IntVar(&port, "port", 8080, "http port")
 	flag.IntVar(&zoom, "zoom", 0, "zoom")
 	flag.StringVar(&zoomConfig, "zoom-config", "raster:2", "zoom type [ raster:N | circle:R:S ] default is 'raster:2'")
 	flag.StringVar(&colorSet, "color-set", "default", "colorset [ default | gray ] default is 'default'")

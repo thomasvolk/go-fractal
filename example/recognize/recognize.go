@@ -190,7 +190,14 @@ func learn(learnsetDir string, inputLayer, iterations int, middleLayer []int) va
 }
 
 func main() {
-	var width, height int
+	var x float64
+	var xradius float64
+	var y float64
+	var yradius float64
+	var iterations int
+	var width int
+	var height int
+	var zoomoutputdir string
 	var learnSetDir, learnSetFile string
 	var shapeThreshold float64
 	var shapeSize int
@@ -200,8 +207,14 @@ func main() {
 
 	flag.StringVar(&learnSetDir, "learnset", "learnset", "learn set result dir")
 	flag.StringVar(&learnSetFile, "learnset-source", "learnset.txt", "learn set source file")
-	flag.IntVar(&width, "width", 600, "width")
-	flag.IntVar(&height, "height", 600, "height")
+	flag.Float64Var(&x, "x", -0.6, "xstart")
+	flag.Float64Var(&xradius, "xradius", 1.6, "xradius")
+	flag.Float64Var(&y, "y", 0.0, "ystart")
+	flag.Float64Var(&yradius, "yradius", 1.2, "yradius")
+	flag.IntVar(&iterations, "iterations", 100, "iterations")
+	flag.IntVar(&width, "width", 400, "width")
+	flag.IntVar(&height, "height", 300, "height")
+	flag.StringVar(&zoomoutputdir, "zoomout", "toom", "zoom outputdir")
 	flag.IntVar(&shapeSize, "shape-size", 9, "count of shape points")
 	flag.Float64Var(&shapeThreshold, "shape-threshold", 0.03, "threshold for detectiong the shape")
 	flag.IntVar(&learnIterations, "learn", 6000, "count of learn steps")
@@ -243,4 +256,28 @@ func main() {
 		fmt.Printf("result: %f - expected: %f\n", result[0], expectedRating)
 	}
 
+	fmt.Println("# zoom:")
+	m := fractal.ComplexSet{
+		Real:      fractal.NewRange(x, xradius),
+		Imaginary: fractal.NewRange(y, yradius),
+		Algorithm: fractal.Mandelbrot,
+	}
+	p := m.Plane(width, height, iterations)
+	division := 2
+	frames := p.RasterFrames(division)
+	for _, f := range frames {
+		cx, cy := f.Box().Center()
+		s := f.Shape(cx, cy, shapeSize, shapeThreshold)
+		sn := s.Normalize()
+		shapeValues := make([]float64, len(sn)*2)
+		count := 0
+		for _, p := range sn {
+			shapeValues[count] = p[0]
+			count++
+			shapeValues[count] = p[1]
+			count++
+		}
+		result := net.Calculate(shapeValues)
+		fmt.Println(result)
+	}
 }
