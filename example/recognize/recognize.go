@@ -7,6 +7,7 @@ import (
 	"image"
 	"image/color"
 	"image/png"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -32,6 +33,15 @@ func openFile(filename string) *os.File {
 		panic(err)
 	}
 	return f
+}
+
+func exists(name string) bool {
+	if _, err := os.Stat(name); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
 }
 
 func writeFile(num int, cs *fractal.ComplexSet, width, height, iterations int,
@@ -99,6 +109,7 @@ func parseIntArray(valuesLine string) []int {
 
 func createLearnSet(sourceFile, outputdir string, threshold float64,
 	shapeSize, width, height int) {
+	os.Mkdir(outputdir, os.ModePerm)
 	file := openFile(sourceFile)
 	defer file.Close()
 
@@ -199,16 +210,29 @@ func main() {
 
 	flag.Parse()
 
-	fmt.Println("# create learn set ...")
-	createLearnSet(learnSetFile, learnSetDir, shapeThreshold, shapeSize, width, height)
+	if !exists(learnSetDir) {
+		fmt.Println("# create learn set ...")
+		createLearnSet(learnSetFile, learnSetDir, shapeThreshold, shapeSize, width, height)
+	}
 
-	fmt.Println("# learn ...")
-	net := learn(learnSetDir, shapeSize*2, learnIterations, parseIntArray(middleLayer))
+	var net varis.Perceptron
 
-	netJson := varis.ToJSON(net)
-	file := createFile(netFile)
-	defer file.Close()
-	file.Write([]byte(netJson))
+	if !exists(netFile) {
+		fmt.Println("# learn ...")
+		net = learn(learnSetDir, shapeSize*2, learnIterations, parseIntArray(middleLayer))
+		netJson := varis.ToJSON(net)
+		file := createFile(netFile)
+		defer file.Close()
+		file.Write([]byte(netJson))
+	} else {
+		netJson, err := ioutil.ReadFile(netFile)
+
+		if err != nil {
+			panic(err)
+		}
+
+		net = varis.FromJSON(string(netJson))
+	}
 
 	fmt.Println("# test:")
 	learnSet := getLearnSet(learnSetDir)

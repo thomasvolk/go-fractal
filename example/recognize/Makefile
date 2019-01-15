@@ -11,6 +11,5 @@ clean:
 	rm -rf recognize *.png learnset net.json
 
 test-run: build
-	mkdir -p learnset
 	time ./recognize
 
