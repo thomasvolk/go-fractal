@@ -118,6 +118,7 @@ func main() {
 		Algorithm: fractal.Mandelbrot,
 	}
 
+	os.MkdirAll(outputdir, os.ModePerm)
 	p := m.Plane(width, height, iterations)
 	writeFile(0, outputdir, &p, colorSet)
 

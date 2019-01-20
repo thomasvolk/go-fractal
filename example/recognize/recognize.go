@@ -44,7 +44,7 @@ func exists(name string) bool {
 	return true
 }
 
-func writeFile(num int, cs *fractal.ComplexSet, width, height, iterations int,
+func generateShape(num int, cs *fractal.ComplexSet, width, height, iterations int,
 	rating float64, outputdir string,
 	shapeSize int, threshold float64) {
 	plane := cs.Plane(width, height, iterations)
@@ -109,7 +109,7 @@ func parseIntArray(valuesLine string) []int {
 
 func createLearnSet(sourceFile, outputdir string, threshold float64,
 	shapeSize, width, height int) {
-	os.Mkdir(outputdir, os.ModePerm)
+	os.MkdirAll(outputdir, os.ModePerm)
 	file := openFile(sourceFile)
 	defer file.Close()
 
@@ -135,7 +135,7 @@ func createLearnSet(sourceFile, outputdir string, threshold float64,
 			Imaginary: fractal.NewRange(y, r),
 			Algorithm: fractal.Mandelbrot,
 		}
-		writeFile(count, &m, width, height, iterations,
+		generateShape(count, &m, width, height, iterations,
 			rating, outputdir, shapeSize, threshold)
 	}
 
@@ -189,6 +189,16 @@ func learn(learnsetDir string, inputLayer, iterations int, middleLayer []int) va
 	return net
 }
 
+func writeImage(num int, outputdir string, plane *fractal.Plane, colorSet string) {
+	cs := plane.ComplexSet()
+	f, err := os.Create(fmt.Sprintf("%s/%03d_Real_%s_Imag_%s.png", outputdir, num, cs.Real, cs.Imaginary))
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	png.Encode(f, plane.ImageWithColorSet(colorSet))
+}
+
 func main() {
 	var x float64
 	var xradius float64
@@ -204,6 +214,7 @@ func main() {
 	var learnIterations int
 	var middleLayer string
 	var netFile string
+	var zoomdir string
 
 	flag.StringVar(&learnSetDir, "learnset", "learnset", "learn set result dir")
 	flag.StringVar(&learnSetFile, "learnset-source", "learnset.txt", "learn set source file")
@@ -220,6 +231,7 @@ func main() {
 	flag.IntVar(&learnIterations, "learn", 6000, "count of learn steps")
 	flag.StringVar(&middleLayer, "middle-layer", "19", "layout of the neuron middle layer")
 	flag.StringVar(&netFile, "net", "net.json", "net output file")
+	flag.StringVar(&zoomdir, "zoomdir", "zoom", "output dir for zoom results")
 
 	flag.Parse()
 
@@ -257,6 +269,8 @@ func main() {
 	}
 
 	fmt.Println("# zoom:")
+	os.MkdirAll(zoomdir, os.ModePerm)
+
 	m := fractal.ComplexSet{
 		Real:      fractal.NewRange(x, xradius),
 		Imaginary: fractal.NewRange(y, yradius),
@@ -265,6 +279,8 @@ func main() {
 	p := m.Plane(width, height, iterations)
 	division := 2
 	frames := p.RasterFrames(division)
+	rating := 0.0
+	var selectedFrame fractal.Plane
 	for _, f := range frames {
 		cx, cy := f.Box().Center()
 		s := f.Shape(cx, cy, shapeSize, shapeThreshold)
@@ -277,7 +293,11 @@ func main() {
 			shapeValues[count] = p[1]
 			count++
 		}
-		result := net.Calculate(shapeValues)
-		fmt.Println(result)
+		result := net.Calculate(shapeValues)[0]
+		if result > rating {
+			rating = result
+			selectedFrame = f.Scale(width, height)
+		}
 	}
+	writeImage(0, zoomdir, &selectedFrame, "default")
 }
