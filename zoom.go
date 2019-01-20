@@ -50,8 +50,8 @@ func (p Plane) RasterFrames(division int) []Plane {
 	boxes := division * division
 	frames := make([]Plane, boxes)
 	for f := 0; f < boxes; f++ {
-		x := (f * wd) % p.width
-		y := (f * hd) % p.height
+		x := (f * wd) % (division * wd)
+		y := (f * hd) % (division * hd)
 		frames[f] = p.Crop(Box{x, y, wd, hd})
 	}
 	return frames

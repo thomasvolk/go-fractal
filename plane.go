@@ -71,17 +71,19 @@ func mean(plane [][]int) float64 {
 
 func crop(plane [][]int, box Box) [][]int {
 	part := make([][]int, box.Width)
+	px := 0
 	for x, col := range plane {
-		px := x - box.X
-		if px >= 0 && px < box.Width {
+		if x >= box.X && x < (box.Width+box.X) {
 			partCol := make([]int, box.Height)
+			py := 0
 			for y, val := range col {
-				py := y - box.Y
-				if py >= 0 && py < box.Height {
+				if y >= box.Y && y < (box.Height+box.Y) {
 					partCol[py] = val
+					py++
 				}
 			}
 			part[px] = partCol
+			px++
 		}
 	}
 	return part
