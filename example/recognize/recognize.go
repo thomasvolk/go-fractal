@@ -199,27 +199,29 @@ func writeImage(num int, outputdir string, plane *fractal.Plane, colorSet string
 	png.Encode(f, plane.ImageWithColorSet(colorSet))
 }
 
-func zoom(num, width, height, division, shapeSize int, shapeThreshold float64,
+func zoom(num, width, height, shapeSize int, shapeThreshold float64,
 	p *fractal.Plane, net *varis.Perceptron, zoomdir string) fractal.Plane {
-	frames := p.RasterFrames(division)
-	rating := 0.0
 	var selectedFrame fractal.Plane
-	for _, f := range frames {
-		cx, cy := f.Box().Center()
-		s := f.Shape(cx, cy, shapeSize, shapeThreshold)
-		sn := s.Normalize()
-		shapeValues := make([]float64, len(sn)*2)
-		count := 0
-		for _, p := range sn {
-			shapeValues[count] = p[0]
-			count++
-			shapeValues[count] = p[1]
-			count++
-		}
-		result := net.Calculate(shapeValues)[0]
-		if result > rating {
-			rating = result
-			selectedFrame = f.Scale(width, height)
+	rating := 0.0
+	for division := 2; division < 11; division++ {
+		frames := p.RasterFrames(division)
+		for _, f := range frames {
+			cx, cy := f.Box().Center()
+			s := f.Shape(cx, cy, shapeSize, shapeThreshold)
+			sn := s.Normalize()
+			shapeValues := make([]float64, len(sn)*2)
+			count := 0
+			for _, p := range sn {
+				shapeValues[count] = p[0]
+				count++
+				shapeValues[count] = p[1]
+				count++
+			}
+			result := net.Calculate(shapeValues)[0]
+			if result > rating {
+				rating = result
+				selectedFrame = f.Scale(width, height)
+			}
 		}
 	}
 	writeImage(num, zoomdir, &selectedFrame, "default")
@@ -250,7 +252,7 @@ func main() {
 	flag.Float64Var(&xradius, "xradius", 1.6, "xradius")
 	flag.Float64Var(&y, "y", 0.0, "ystart")
 	flag.Float64Var(&yradius, "yradius", 1.2, "yradius")
-	flag.IntVar(&iterations, "iterations", 100, "iterations")
+	flag.IntVar(&iterations, "iterations", 600, "iterations")
 	flag.IntVar(&width, "width", 400, "width")
 	flag.IntVar(&height, "height", 300, "height")
 	flag.StringVar(&zoomoutputdir, "zoomout", "toom", "zoom outputdir")
@@ -260,7 +262,7 @@ func main() {
 	flag.StringVar(&middleLayer, "middle-layer", "19", "layout of the neuron middle layer")
 	flag.StringVar(&netFile, "net", "net.json", "net output file")
 	flag.StringVar(&zoomdir, "zoomdir", "zoom", "output dir for zoom results")
-	flag.IntVar(&zoomIter, "zoom", 10, "zoom iterations")
+	flag.IntVar(&zoomIter, "zoom", 20, "zoom iterations")
 
 	flag.Parse()
 
@@ -306,8 +308,7 @@ func main() {
 		Algorithm: fractal.Mandelbrot,
 	}
 	p := m.Plane(width, height, iterations)
-	division := 2
 	for i := 0; i < zoomIter; i++ {
-		p = zoom(i, width, height, division, shapeSize, shapeThreshold, &p, &net, zoomdir)
+		p = zoom(i, width, height, shapeSize, shapeThreshold, &p, &net, zoomdir)
 	}
 }
