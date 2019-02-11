@@ -206,18 +206,7 @@ func zoom(num, width, height, shapeSize int, shapeThreshold float64,
 	for division := 2; division < 11; division++ {
 		frames := p.RasterFrames(division)
 		for _, f := range frames {
-			cx, cy := f.Box().Center()
-			s := f.Shape(cx, cy, shapeSize, shapeThreshold)
-			sn := s.Normalize()
-			shapeValues := make([]float64, len(sn)*2)
-			count := 0
-			for _, p := range sn {
-				shapeValues[count] = p[0]
-				count++
-				shapeValues[count] = p[1]
-				count++
-			}
-			result := net.Calculate(shapeValues)[0]
+			result := calculateRating(net, &f, shapeSize, shapeThreshold)
 			if result > rating {
 				rating = result
 				selectedFrame = f.Scale(width, height)
@@ -226,6 +215,21 @@ func zoom(num, width, height, shapeSize int, shapeThreshold float64,
 	}
 	writeImage(num, zoomdir, &selectedFrame, "default")
 	return selectedFrame
+}
+
+func calculateRating(net *varis.Perceptron, p *fractal.Plane, shapeSize int, shapeThreshold float64) float64 {
+	cx, cy := p.Box().Center()
+	s := p.Shape(cx, cy, shapeSize, shapeThreshold)
+	sn := s.Normalize()
+	shapeValues := make([]float64, len(sn)*2)
+	count := 0
+	for _, p := range sn {
+		shapeValues[count] = p[0]
+		count++
+		shapeValues[count] = p[1]
+		count++
+	}
+	return net.Calculate(shapeValues)[0]
 }
 
 func main() {
