@@ -107,7 +107,7 @@ func main() {
 	flag.IntVar(&height, "height", 300, "height")
 	flag.StringVar(&outputdir, "outputdir", ".", "outputdir")
 	flag.IntVar(&zoom, "zoom", 0, "zoom")
-	flag.StringVar(&zoomConfig, "zoom-config", "raster:2", "zoom type [ raster:N | circle:R:S ] default is 'raster:2'")
+	flag.StringVar(&zoomConfig, "zoom-config", "raster:2", "zoom type [ raster:N | circle:x:y:R:S ] default is 'raster:2'")
 	flag.StringVar(&colorSet, "color-set", "default", "colorset [ default | gray ] default is 'default'")
 
 	flag.Parse()
