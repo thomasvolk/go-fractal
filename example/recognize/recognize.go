@@ -236,7 +236,6 @@ func main() {
 	var iterations int
 	var width int
 	var height int
-	var zoomoutputdir string
 	var learnSetDir, learnSetFile string
 	var shapeThreshold float64
 	var shapeSize int
@@ -255,7 +254,6 @@ func main() {
 	flag.IntVar(&iterations, "iterations", 600, "iterations")
 	flag.IntVar(&width, "width", 400, "width")
 	flag.IntVar(&height, "height", 300, "height")
-	flag.StringVar(&zoomoutputdir, "zoomout", "toom", "zoom outputdir")
 	flag.IntVar(&shapeSize, "shape-size", 9, "count of shape points")
 	flag.Float64Var(&shapeThreshold, "shape-threshold", 0.03, "threshold for detectiong the shape")
 	flag.IntVar(&learnIterations, "learn", 6000, "count of learn steps")
