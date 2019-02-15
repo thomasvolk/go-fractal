@@ -49,17 +49,3 @@ func TestMaxPitch(t *testing.T) {
 		Value{3, 0, -110},
 	}, 120, 0.4))
 }
-
-func TestCreateShape(t *testing.T) {
-	iterations := 10
-	c := ComplexSet{
-		Real:      Range{-1.5, 1.5},
-		Imaginary: Range{-1.0, 1.0},
-		Algorithm: Mandelbrot,
-	}
-	p := c.Plane(400, 300, iterations)
-	frames := p.RasterFrames(3)
-	f := frames[3]
-	cx, cy := f.Box().Center()
-	f.Shape(cx, cy, 20, 0.03)
-}

@@ -5,75 +5,9 @@ import (
 	"fmt"
 	"image/png"
 	"os"
-	"strconv"
-	"strings"
 
 	fractal "../.."
 )
-
-type Zoomer interface {
-	Zoom(fractal.Plane) fractal.Plane
-}
-
-type RasterAutoZoom struct {
-	division int
-}
-
-type CircleAutoZoom struct {
-	x             int
-	y             int
-	radiusDivisor int
-	angleStep     int
-}
-
-func (r RasterAutoZoom) Zoom(p fractal.Plane) fractal.Plane {
-	return p.RasterAutoZoom(r.division)
-}
-
-func (c CircleAutoZoom) Zoom(p fractal.Plane) fractal.Plane {
-	newPlane := p.CircleAutoZoom(c.x, c.y, float64(c.radiusDivisor), float64(c.angleStep))
-	c.x = newPlane.Width() / 2
-	c.y = newPlane.Height() / 2
-	return newPlane
-}
-
-func getZoomer(zoomConfig string) Zoomer {
-	zoom := strings.Split(zoomConfig, ":")
-	zoomType := zoom[0]
-	if zoomType == "raster" {
-		division, err := strconv.Atoi(zoom[1])
-		if err != nil {
-			panic(err)
-		}
-		return RasterAutoZoom{division}
-	}
-	if zoomType == "circle" {
-		x, err := strconv.Atoi(zoom[1])
-		if err != nil {
-			panic(err)
-		}
-		y, err := strconv.Atoi(zoom[2])
-		if err != nil {
-			panic(err)
-		}
-		radiusDivisor := 5
-		if len(zoom) > 3 {
-			radiusDivisor, err = strconv.Atoi(zoom[3])
-			if err != nil {
-				panic(err)
-			}
-		}
-		angleStep := 6
-		if len(zoom) > 4 {
-			angleStep, err = strconv.Atoi(zoom[4])
-			if err != nil {
-				panic(err)
-			}
-		}
-		return CircleAutoZoom{x, y, radiusDivisor, angleStep}
-	}
-	panic(fmt.Sprintf("unknown zoom type: %s\n", zoomType))
-}
 
 func writeFile(num int, outputdir string, plane *fractal.Plane, colorSet string) {
 	cs := plane.ComplexSet()
@@ -95,8 +29,9 @@ func main() {
 	var height int
 	var outputdir string
 	var zoom int
-	var zoomConfig string
+	var zoomFactor float64
 	var colorSet string
+	var slideStep int
 
 	flag.Float64Var(&x, "x", -0.6, "xstart")
 	flag.Float64Var(&xradius, "xradius", 1.6, "xradius")
@@ -107,8 +42,9 @@ func main() {
 	flag.IntVar(&height, "height", 300, "height")
 	flag.StringVar(&outputdir, "outputdir", ".", "outputdir")
 	flag.IntVar(&zoom, "zoom", 0, "zoom")
-	flag.StringVar(&zoomConfig, "zoom-config", "raster:2", "zoom type [ raster:N | circle:x:y:R:S ] default is 'raster:2'")
+	flag.Float64Var(&zoomFactor, "zoom-factor", 0.5, "zoom factor valid value 1 > and > 0 ")
 	flag.StringVar(&colorSet, "color-set", "default", "colorset [ default | gray ] default is 'default'")
+	flag.IntVar(&slideStep, "slide-step", 10, "sliding step for zoom")
 
 	flag.Parse()
 
@@ -122,10 +58,8 @@ func main() {
 	p := m.Plane(width, height, iterations)
 	writeFile(0, outputdir, &p, colorSet)
 
-	zoomer := getZoomer(zoomConfig)
 	for z := 0; z < zoom; z++ {
-		p = zoomer.Zoom(p)
-		p = p.Scale(width, height)
+		p = p.AutoZoom(zoomFactor, slideStep)
 		writeFile(z+1, outputdir, &p, colorSet)
 	}
 }

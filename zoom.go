@@ -1,58 +1,29 @@
 package fractal
 
-import "math"
+import (
+	"fmt"
+)
 
-func (p Plane) CircleAutoZoom(x int, y int, radiusDivisor float64, angleStep float64) Plane {
-	frames := p.CircleFrames(x, y, radiusDivisor, angleStep)
-	currentDeviation := 0.0
-	bestFrame := p
-	for _, frame := range frames {
-		d := frame.Deviation()
-		if d > currentDeviation {
-			currentDeviation = d
-			bestFrame = frame
-		}
-
+func (p Plane) FromSlidingFrames(zoomFactor float64, slideStep int, raiter func(Plane) float64) Plane {
+	if zoomFactor <= 0.0 || zoomFactor > 1.0 {
+		panic(fmt.Sprintf("invalid zoomFactor: %f", zoomFactor))
 	}
-	return bestFrame
-}
-
-func (p Plane) CircleFrames(x int, y int, radiusDivisor float64, angleStep float64) []Plane {
-	box := p.Box().InnerBox(x, y)
-	rx := float64(box.Width) / radiusDivisor
-	ry := float64(box.Height) / radiusDivisor
-	var frames []Plane
-	for theta := 0.0; theta < 360.0; theta += angleStep {
-		px := x + int(rx*math.Cos(theta))
-		py := y + int(ry*math.Sin(theta))
-		frames = append(frames, p.Crop(box.InnerBox(px, py)))
-	}
-	return frames
-}
-
-func (p Plane) RasterAutoZoom(division int) Plane {
-	frames := p.RasterFrames(division)
-	currentDeviation := 0.0
+	frameWith := int(float64(p.width) * zoomFactor)
+	frameHeight := int(float64(p.height) * zoomFactor)
 	bestFrame := p
-	for _, f := range frames {
-		d := f.Deviation()
-		if d > currentDeviation {
-			currentDeviation = d
-			bestFrame = f
+	bestRaiting := 0.0
+	for x := 0; x < (p.width - frameWith); x = x + slideStep {
+		for y := 0; y < (p.height - frameHeight); y = y + slideStep {
+			currentFrame := p.Crop(Box{x, y, frameWith, frameHeight})
+			currentRaiting := raiter(currentFrame)
+			if currentRaiting > bestRaiting {
+				bestFrame = currentFrame
+			}
 		}
 	}
-	return bestFrame
+	return bestFrame.Scale(p.width, p.height)
 }
 
-func (p Plane) RasterFrames(division int) []Plane {
-	wd := p.width / division
-	hd := p.height / division
-	boxes := division * division
-	frames := make([]Plane, boxes)
-	for f := 0; f < boxes; f++ {
-		x := (f * wd) % (division * wd)
-		y := (f * hd) % (division * hd)
-		frames[f] = p.Crop(Box{x, y, wd, hd})
-	}
-	return frames
+func (p Plane) AutoZoom(zoomFactor float64, slideStep int) Plane {
+	return p.FromSlidingFrames(zoomFactor, slideStep, Plane.Deviation)
 }

@@ -200,19 +200,13 @@ func writeImage(num int, outputdir string, plane *fractal.Plane, colorSet string
 }
 
 func zoom(num, width, height, shapeSize int, shapeThreshold float64,
-	p *fractal.Plane, net *varis.Perceptron, zoomdir string) fractal.Plane {
-	var selectedFrame fractal.Plane
-	rating := 0.0
-	for division := 2; division < 11; division++ {
-		frames := p.RasterFrames(division)
-		for _, f := range frames {
-			result := calculateRating(net, &f, shapeSize, shapeThreshold)
-			if result > rating {
-				rating = result
-				selectedFrame = f.Scale(width, height)
-			}
-		}
+	p *fractal.Plane, net *varis.Perceptron, zoomdir string, zoomFactor float64, slideStep int) fractal.Plane {
+
+	raiter := func(p fractal.Plane) float64 {
+		return calculateRating(net, &p, shapeSize, shapeThreshold)
 	}
+	selectedFrame := p.FromSlidingFrames(zoomFactor, slideStep, raiter)
+
 	writeImage(num, zoomdir, &selectedFrame, "default")
 	return selectedFrame
 }
@@ -248,6 +242,8 @@ func main() {
 	var netFile string
 	var zoomdir string
 	var zoomIter int
+	var zoomFactor float64
+	var slideStep int
 
 	flag.StringVar(&learnSetDir, "learnset", "learnset", "learn set result dir")
 	flag.StringVar(&learnSetFile, "learnset-source", "learnset.txt", "learn set source file")
@@ -265,6 +261,8 @@ func main() {
 	flag.StringVar(&netFile, "net", "net.json", "net output file")
 	flag.StringVar(&zoomdir, "zoomdir", "zoom", "output dir for zoom results")
 	flag.IntVar(&zoomIter, "zoom", 20, "zoom iterations")
+	flag.Float64Var(&zoomFactor, "zoom-factor", 0.5, "zoom factor valid value 1 > and > 0 ")
+	flag.IntVar(&slideStep, "slide-step", 10, "sliding step for zoom")
 
 	flag.Parse()
 
@@ -311,6 +309,6 @@ func main() {
 	}
 	p := m.Plane(width, height, iterations)
 	for i := 0; i < zoomIter; i++ {
-		p = zoom(i, width, height, shapeSize, shapeThreshold, &p, &net, zoomdir)
+		p = zoom(i, width, height, shapeSize, shapeThreshold, &p, &net, zoomdir, zoomFactor, slideStep)
 	}
 }
