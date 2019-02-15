@@ -261,7 +261,7 @@ func main() {
 	flag.StringVar(&netFile, "net", "net.json", "net output file")
 	flag.StringVar(&zoomdir, "zoomdir", "zoom", "output dir for zoom results")
 	flag.IntVar(&zoomIter, "zoom", 20, "zoom iterations")
-	flag.Float64Var(&zoomFactor, "zoom-factor", 0.5, "zoom factor valid value 1 > and > 0 ")
+	flag.Float64Var(&zoomFactor, "zoom-factor", 0.2, "zoom factor valid value 1 > and > 0 ")
 	flag.IntVar(&slideStep, "slide-step", 10, "sliding step for zoom")
 
 	flag.Parse()
