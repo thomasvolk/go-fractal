@@ -17,6 +17,7 @@ func (p Plane) FromSlidingFrames(zoomFactor float64, slideStep int, raiter func(
 			currentFrame := p.Crop(Box{x, y, frameWith, frameHeight})
 			currentRaiting := raiter(currentFrame)
 			if currentRaiting > bestRaiting {
+				bestRaiting = currentRaiting
 				bestFrame = currentFrame
 			}
 		}
